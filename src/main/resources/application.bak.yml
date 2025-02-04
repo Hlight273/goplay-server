@@ -1,0 +1,31 @@
+file:
+  upload-dir:
+    audio: E:\xxx
+jwt:
+  replayatk:
+    tolerance: 5
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+server:
+  port: 8081
+spring:
+  application:
+    name: goplay-server
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    password: root
+    type: com.alibaba.druid.pool.DruidDataSource
+    url: jdbc:mysql://localhost:3306/goplaydb?useSSL=false&allowPublicKeyRetrieval=true
+    username: root
+  devtools:
+    restart:
+      additional-paths: src/main/java
+      enabled: true
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+  web:
+    resources:
+      static-locations: classpath:/static,/upload/
