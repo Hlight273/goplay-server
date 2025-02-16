@@ -1,6 +1,8 @@
 package com.github.goplay.controller;
 
 import com.github.goplay.entity.Room;
+import com.github.goplay.event.EventType;
+import com.github.goplay.event.RoomUpdateEvent;
 import com.github.goplay.service.RoomService;
 import com.github.goplay.service.SongService;
 import com.github.goplay.utils.UploadUtils;
@@ -9,19 +11,11 @@ import com.github.goplay.utils.Result;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.UnsupportedAudioFileException;
-import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -30,6 +24,11 @@ public class FileUpController {
     @Value("${file.upload-dir.audio}")
     public String audioDir;
 
+    private final ApplicationEventPublisher eventPublisher;
+    public FileUpController(ApplicationEventPublisher eventPublisher) {
+        this.eventPublisher = eventPublisher;
+    }
+
     @Autowired
     private RoomService roomService;
 
@@ -37,7 +36,7 @@ public class FileUpController {
     private SongService songService;
 
     @PostMapping("/audio/room/{roomCode}/audio")
-    public Result UploadAudio(Integer userId, MultipartFile file, HttpServletRequest request, @PathVariable String roomCode) {
+    public Result UploadAudio(@RequestParam("userId") Integer userId, @RequestParam("file") MultipartFile file,  @PathVariable String roomCode) {
         Result result = UploadUtils.getAudioValidation(file);
         if(result!=null)
             return result;
@@ -52,9 +51,11 @@ public class FileUpController {
             String path = FileUtils.saveFile(file, audioDir, fileName);
 
             int i = songService.addSong(file,room,userId,path,fileName);
-            if(i>0)
+            if(i>0){
+                eventPublisher.publishEvent(new RoomUpdateEvent(this, room.getId(), EventType.ROOM_SONG_LIST));
                 return Result.ok()
-                    .message("音频"+originalFilename+"上传成功！");
+                        .message("音频"+originalFilename+"上传成功！");
+            }
             else
                 return Result.error()
                     .message("音频上传失败！");

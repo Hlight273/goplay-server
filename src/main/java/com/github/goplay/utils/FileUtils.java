@@ -82,6 +82,8 @@ public class FileUtils {
             AudioFile audio = AudioFileIO.read(audioFile);
             Tag tag = audio.getTag();
             Artwork artwork = tag.getFirstArtwork();
+            if(artwork==null)
+                return null;
             byte[] imgBinaryData = artwork.getBinaryData();
             String newFileName = audioFile. getName().substring(0, audioFile. getName().lastIndexOf(".")) + ".png";
             saveImageToAudioFile(imgBinaryData,audioFile.getParent(), newFileName);// 保存二进制专辑封面数据到指定目录
@@ -111,7 +113,7 @@ public class FileUtils {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return null;
+        return audioFile.getName();
     }
 
     public static String getAudioArtist(File audioFile){
@@ -122,7 +124,7 @@ public class FileUtils {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return null;
+        return "未知艺术家";
     }
 
     public static String getAudioAlbum(File audioFile){
@@ -133,7 +135,7 @@ public class FileUtils {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return null;
+        return "未知专辑";
     }
 
     public static Integer getAudioSize(File audioFile){
@@ -156,6 +158,7 @@ public class FileUtils {
         InputStream inputStream = null;
         ByteArrayOutputStream outputStream = null;
         byte[] buffer = null;
+        if(imgStr == null) return null;
         try {
             //判断网络链接图片文件/本地目录图片文件
             if (imgStr.startsWith("http://") || imgStr.startsWith("https://")) {

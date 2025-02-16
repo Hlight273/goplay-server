@@ -1,6 +1,7 @@
 package com.github.goplay.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.github.goplay.dto.SongContent;
 import com.github.goplay.dto.UserInfo;
 import com.github.goplay.entity.RoomSong;
@@ -68,5 +69,26 @@ public class RoomSongService {
             songContentList.add(songContent);
         }
         return songContentList;
+    }
+
+    @Transactional
+    public boolean removeSongInRoom(Integer roomId, Integer songId) {
+        RoomSong target_RoomSong = roomSongMapper.selectOne(
+                new QueryWrapper<RoomSong>()
+                        .eq("room_id", roomId)
+                        .eq("song_id", songId)
+                        .eq("is_active", true)//用room_id查roomSong表的记录
+        );
+        if(target_RoomSong==null)
+            return false;
+        int i = roomSongMapper.update(
+                null,
+                new UpdateWrapper<RoomSong>()
+                        .eq("room_id", roomId)
+                        .eq("song_id", songId)
+                        .eq("is_active", true)
+                        .set("is_active", false)
+        );
+        return i > 0;
     }
 }

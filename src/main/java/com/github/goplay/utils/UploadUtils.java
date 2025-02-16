@@ -15,7 +15,7 @@ public class UploadUtils {
 //    public String audioDir;
 
     // 限制的最大文件大小（以字节为单位，1MB = 1024 * 1024 bytes）
-    private static long maxFileSize = 50 * 1024 * 1024; // 允许最大50MB的音频文件
+    private static long maxFileSize = 100 * 1024 * 1024; // 允许最大100MB的音频文件
 
     // 允许的 MIME 类型
     private static List<String> allowedMimeTypes = Arrays.asList(
