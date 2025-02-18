@@ -1,5 +1,6 @@
 package com.github.goplay.config;
 
+import com.github.goplay.websocket.WebSocketSessionRegistry;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.web.socket.config.annotation.*;
@@ -8,9 +9,15 @@ import org.springframework.web.socket.config.annotation.*;
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
+    private final WebSocketSessionRegistry webSocketSessionRegistry;
+
+    public WebSocketConfig(WebSocketSessionRegistry webSocketSessionRegistry) {
+        this.webSocketSessionRegistry = webSocketSessionRegistry;
+    }
+
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
-        config.enableSimpleBroker("/topic"); // 使用内存中的简单代理来广播消息
+        config.enableSimpleBroker("queue","/topic"); // 使用内存中的简单代理来广播消息
         config.setApplicationDestinationPrefixes("/app"); // 客户端发送消息到服务器的前缀
     }
 
@@ -21,5 +28,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 .setAllowedOriginPatterns("*")
                 .withSockJS();
     }
+
+
 
 }

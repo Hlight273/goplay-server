@@ -18,6 +18,20 @@ spring:
     type: com.alibaba.druid.pool.DruidDataSource
     url: jdbc:mysql://localhost:3306/goplaydb?useSSL=false&allowPublicKeyRetrieval=true
     username: root
+
+    data:
+      redis:
+        host: localhost
+        port: 6379
+        password: root
+        timeout: 2000ms
+      session:
+        store-type: redis
+        redis:
+          namespace: session
+          flush-mode: on_save
+        timeout: 1800s # 会话过期时间
+
   devtools:
     restart:
       additional-paths: src/main/java

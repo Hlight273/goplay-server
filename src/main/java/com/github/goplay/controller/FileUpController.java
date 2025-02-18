@@ -47,7 +47,11 @@ public class FileUpController {
                 return Result.error().message("房间不存在！");
 
             String originalFilename = file.getOriginalFilename();
-            String fileName = UUID.randomUUID() + "_" + originalFilename;
+            String postFix = null;
+            if (originalFilename != null) {
+                postFix = originalFilename.substring(originalFilename.lastIndexOf("."));
+            }
+            String fileName = UUID.randomUUID().toString() + postFix; //+ "_" + originalFilename;
             String path = FileUtils.saveFile(file, audioDir, fileName);
 
             int i = songService.addSong(file,room,userId,path,fileName);

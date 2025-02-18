@@ -3,14 +3,26 @@ package com.github.goplay.dto;
 public class PlayerData {
     private Integer index;
     private String url;
-    private Integer curTime;
+    private Double curTime;
     private boolean paused;
+    private Integer srcUserId;
+    private boolean isExternal;
 
-    public PlayerData(Integer index, String url, Integer curTime, boolean paused) {
+    public PlayerData(Integer index, String url, Double curTime, boolean paused, Integer srcUserId, boolean isExternal) {
         this.index = index;
         this.url = url;
         this.curTime = curTime;
         this.paused = paused;
+        this.srcUserId = srcUserId;
+        this.isExternal = isExternal;
+    }
+
+    public boolean isExternal() {
+        return isExternal;
+    }
+
+    public void setExternal(boolean external) {
+        isExternal = external;
     }
 
     public PlayerData() {
@@ -28,15 +40,23 @@ public class PlayerData {
         return url;
     }
 
+    public Integer getSrcUserId() {
+        return srcUserId;
+    }
+
+    public void setSrcUserId(Integer srcUserId) {
+        this.srcUserId = srcUserId;
+    }
+
     public void setUrl(String url) {
         this.url = url;
     }
 
-    public Integer getCurTime() {
+    public Double getCurTime() {
         return curTime;
     }
 
-    public void setCurTime(Integer curTime) {
+    public void setCurTime(Double curTime) {
         this.curTime = curTime;
     }
 

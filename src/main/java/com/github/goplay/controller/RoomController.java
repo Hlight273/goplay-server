@@ -11,25 +11,36 @@ import com.github.goplay.service.UserService;
 import com.github.goplay.utils.CommonUtils;
 import com.github.goplay.utils.PrivilegeCode;
 import com.github.goplay.utils.Result;
+import com.github.goplay.websocket.WebSocketSessionRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
+import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.messaging.support.MessageHeaderAccessor;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/room")
 public class RoomController {
 
+    private final WebSocketSessionRegistry sessionRegistry;
     private final ApplicationEventPublisher eventPublisher;
-    public RoomController(ApplicationEventPublisher eventPublisher) {
+
+    public RoomController(WebSocketSessionRegistry sessionRegistry, ApplicationEventPublisher eventPublisher) {
+        this.sessionRegistry = sessionRegistry;
         this.eventPublisher = eventPublisher;
     }
+
     @Autowired
     private RoomService roomService;
     @Autowired
@@ -117,6 +128,7 @@ public class RoomController {
         }
     }
 
+    @Transactional
     @PostMapping("/{roomCode}/join")
     public Result RoomJoin(@PathVariable String roomCode, @RequestBody UserId userId){
         //先查询用户有没有在别的房间
@@ -127,7 +139,7 @@ public class RoomController {
         Room room = roomService.addUserToRoom(userId.getUserId(),roomCode);
         if(room!=null){
             //加入房间需要在房间广播
-            eventPublisher.publishEvent(new RoomUpdateEvent(this, room.getId(), EventType.ROOM_SONG_LIST));
+            eventPublisher.publishEvent(new RoomUpdateEvent(this, room.getId(), EventType.ROOM_USER_LIST));
             //http响应
             return Result.ok()
                     .oData(room)
@@ -137,18 +149,20 @@ public class RoomController {
         }
     }
 
+    @Transactional
     @DeleteMapping("/{roomCode}/user/{userId}")
     public Result RoomExit(@PathVariable String roomCode, @PathVariable Integer userId){
         boolean exitSuccessful = roomService.deleteUserFromRoom(userId,roomCode);
         if(exitSuccessful){
             Room room = roomService.getRoomByRoomCode(roomCode);
-            eventPublisher.publishEvent(new RoomUpdateEvent(this, room.getId(), EventType.ROOM_SONG_LIST));
+            eventPublisher.publishEvent(new RoomUpdateEvent(this, room.getId(), EventType.ROOM_USER_LIST));
             return Result.ok().message("退出成功");
         }else {
             return Result.error().message("退出失败");
         }
     }
 
+    @Transactional
     @PostMapping("/{roomCode}/user/{userId}/owner/to/user/{targetUserId}")
     public Result RoomOwnerTransPrivilege(@PathVariable String roomCode,@PathVariable Integer userId, @PathVariable Integer targetUserId){
         Room room = roomService.getRoomByRoomCode(roomCode);
@@ -169,6 +183,7 @@ public class RoomController {
 
 
     //改:推送songlist
+    @Transactional
     @PostMapping("/{roomCode}/song/{songId}/remove")
     public Result RongSongRemove(@PathVariable String roomCode, @PathVariable Integer songId, @RequestBody UserId userId){
         Room room = roomService.getRoomByRoomCode(roomCode);
@@ -200,14 +215,46 @@ public class RoomController {
                                  @DestinationVariable("userId") Integer userId,
                                  @Payload String message) {
         System.out.println("房间id"+roomId+",用户id"+userId+":"+message+",准备转发");
-        return new RoomMsg(userService.getUserInfoById(userId), CommonUtils.curTime(), message);
+        return new RoomMsg(userService.getUserInfoById(userId), CommonUtils.curTime(), sessionRegistry.getTargetSession(roomId, userId)+" "+message);
     }
+
+//    //转发管理员点歌状态并广播到该房间 (需要检查管理员权限)
+//    @MessageMapping("/{roomId}/{userId}/change/playerStatus")
+//    //将会发给非发起方的"/topic/{roomId}/playerData"
+//    //@SendTo("/user/{targetUserId}/topic/{roomId}/playerData")
+//    public void HandlePlayerStatus(@DestinationVariable("roomId") Integer roomId,
+//                                 @DestinationVariable("userId") Integer userId,
+//                                 @Payload PlayerData playerData) {
+//        Integer privilege = roomUserService.get_RoomUserInfo_By2Id(roomId, userId).getPrivilege();
+//        if(privilege> PrivilegeCode.ADMIN)
+//            return;
+//            //return null;
+//
+//        Map<Object, Object> roomSessions = sessionRegistry.getRoomSessionsExcludingSender(roomId.toString(), userId.toString());
+//        // 如果有其他用户订阅该房间，发送消息给他们
+//        if (roomSessions != null && !roomSessions.isEmpty()) {
+//            roomSessions.forEach((key, session) -> {
+//                // 发送消息给每个连接的用户
+//                String targetUserId = key.toString();
+//                SimpMessageHeaderAccessor responseAccessor = SimpMessageHeaderAccessor
+//                        .create(SimpMessageType.MESSAGE);
+//                responseAccessor.setSessionId(session.toString());
+//                responseAccessor.setLeaveMutable(true);
+//                MessageHeaders responseMessageHeader =  responseAccessor.getMessageHeaders();
+//                messagingTemplate.convertAndSend("/user/"+targetUserId+ "/queue/" + roomId + "/playerData", playerData );
+//            });
+//        }
+//
+////        System.out.println("房间id"+roomId+",用户id"+userId+":"+playerData+",准备转发");
+////        return playerData;
+//    }
+
     //转发管理员点歌状态并广播到该房间 (需要检查管理员权限)
     @MessageMapping("/{roomId}/{userId}/change/playerStatus")
     @SendTo("/topic/{roomId}/playerData")
-    public PlayerData HandlePlayerStatus(@DestinationVariable("roomId") Integer roomId,
-                                 @DestinationVariable("userId") Integer userId,
-                                 @Payload PlayerData playerData) {
+    public PlayerData HandlePlayerStatusOld(@DestinationVariable("roomId") Integer roomId,
+                                   @DestinationVariable("userId") Integer userId,
+                                   @Payload PlayerData playerData) {
         Integer privilege = roomUserService.get_RoomUserInfo_By2Id(roomId, userId).getPrivilege();
         if(privilege> PrivilegeCode.ADMIN)
             return null;
