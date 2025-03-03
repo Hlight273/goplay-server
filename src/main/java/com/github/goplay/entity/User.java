@@ -13,12 +13,16 @@ public class User {
     private Integer id;
     private String username;
     private String password;
+    private Integer level;
 
-    public User(Integer id, String username, String password) {
+    public User(Integer id, String username, String password, Integer level) {
         this.id = id;
         this.username = username;
         this.password = password;
+        this.level = level;
     }
+
+
 
     public User(String username, String password) {
         this.username = username;
@@ -36,6 +40,14 @@ public class User {
         this.id = id;
     }
 
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
     public String getPassword() {
         return password;
     }
@@ -44,12 +56,12 @@ public class User {
         this.password = password;
     }
 
-    public String getUsername() {
-        return username;
+    public Integer getLevel() {
+        return level;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setLevel(Integer level) {
+        this.level = level;
     }
 
     @Override

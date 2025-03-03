@@ -6,11 +6,13 @@ public class UserInfo {
     private String avatarUrl;
     private Integer room_id;
     private Integer privilege;
+    private Integer level;
 
-    public UserInfo(Integer id, String username, String avatarUrl) {
+    public UserInfo(Integer id, String username, String avatarUrl, Integer level) {
         this.id = id;
         this.username = username;
         this.avatarUrl = avatarUrl;
+        this.level = level;
     }
 
     public UserInfo(Integer id, String username, String avatarUrl, Integer room_id, Integer privilege) {
@@ -62,5 +64,13 @@ public class UserInfo {
 
     public void setPrivilege(Integer privilege) {
         this.privilege = privilege;
+    }
+
+    public Integer getLevel() {
+        return level;
+    }
+
+    public void setLevel(Integer level) {
+        this.level = level;
     }
 }

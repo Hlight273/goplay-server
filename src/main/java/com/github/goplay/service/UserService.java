@@ -1,17 +1,26 @@
 package com.github.goplay.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.github.goplay.dto.UserInfo;
+import com.github.goplay.dto.VipInfo;
 import com.github.goplay.entity.RoomUser;
 import com.github.goplay.entity.User;
+import com.github.goplay.entity.UserVip;
 import com.github.goplay.mapper.RoomMapper;
 import com.github.goplay.mapper.RoomUserMapper;
 import com.github.goplay.mapper.UserMapper;
+import com.github.goplay.mapper.UserVipMapper;
 import com.github.goplay.utils.PrivilegeCode;
 import com.github.goplay.utils.UserUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+
+import static com.github.goplay.utils.CommonUtils.getDaysDiff;
 
 @Service
 public class UserService {
@@ -25,6 +34,8 @@ public class UserService {
     private RoomUserMapper roomUserMapper;
     @Autowired
     private RoomUserService roomUserService;
+    @Autowired
+    private UserVipMapper userVipMapper;
 
     public User getUserByLoginInfo(User user) {
         User queryUser = new User(user.getUsername(), user.getPassword());
@@ -40,7 +51,7 @@ public class UserService {
     public UserInfo getUserInfoById(int id) {
         User user = userMapper.selectById(id);
         if (user == null) return null;
-        return new UserInfo(user.getId(),user.getUsername(), UserUtils.getAvatar());
+        return new UserInfo(user.getId(),user.getUsername(), UserUtils.getAvatar(),user.getLevel());
     }
 
     public Integer getUserPrivilegeInRoom(Integer roomId, Integer userId) {
@@ -108,4 +119,36 @@ public class UserService {
     }
 
 
+
+    //vip信息
+    public boolean renewUserVipInfo(Integer userId, int vipLevel, Timestamp startTime, int validDays){
+        UserVip targetUserVip = getUserVipById(userId);
+        if(targetUserVip==null){
+            return createUserVip(userId, vipLevel, startTime, validDays);
+        }else{
+            return updateUserVip(targetUserVip, vipLevel, startTime, validDays);
+        }
+    }
+    public UserVip getUserVipById(Integer userId) {
+        UserVip userVip = userVipMapper.selectById(userId);
+        if (userVip == null) return null;
+        return userVip;
+    }
+    public VipInfo getVipInfoByUserId(Integer userId) {
+        UserVip userVip = userVipMapper.selectById(userId);
+        if (userVip == null) return null;
+        return new VipInfo(userId, userVip.getVipLevel(), userVip.getStartDate(), userVip.getEndDate(), getDaysDiff(userVip.getStartDate(), userVip.getEndDate()));
+    }
+    private boolean createUserVip(Integer userId, int vipLevel, Timestamp startTime, int validDays) {
+        UserVip userVip = new UserVip(userId, vipLevel, startTime, validDays);
+        return userVipMapper.insert(userVip) == 1;
+    }
+    private boolean updateUserVip(UserVip userVip, int vipLevel, Timestamp startTime, int validDays) {
+        LambdaUpdateWrapper<UserVip> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.set(UserVip::getVipLevel,vipLevel);
+        updateWrapper.set(UserVip::getStartDate,startTime);
+        updateWrapper.set(UserVip::getEndDate, LocalDateTime.now().plusDays(validDays));
+        updateWrapper.eq(UserVip::getId,userVip.getId());
+        return userVipMapper.update(userVip,updateWrapper) == 1;
+    }
 }

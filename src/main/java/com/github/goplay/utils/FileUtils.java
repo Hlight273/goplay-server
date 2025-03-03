@@ -1,5 +1,6 @@
 package com.github.goplay.utils;
 
+import com.github.goplay.entity.SongInfo;
 import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioFileIO;
 import org.jaudiotagger.audio.AudioHeader;
@@ -146,6 +147,15 @@ public class FileUtils {
         Path path = Paths.get(fullPath);
         String fileName = path.getFileName().toString();
         return fileName;
+    }
+
+    public static void fillEmptyNamesForSongInfo(SongInfo songInfo){
+        if(songInfo.getSongName().isEmpty())
+            songInfo.setSongName("未知歌曲");
+        if(songInfo.getSongArtist().isEmpty())
+            songInfo.setSongArtist("未知艺术家");
+        if(songInfo.getSongAlbum().isEmpty())
+            songInfo.setSongAlbum("未知专辑");
     }
 
     /**

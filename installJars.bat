@@ -1,0 +1,2 @@
+mvn install:install-file -Dfile=.\src\main\resources\lib\jaudiotagger-2.2.6-SNAPSHOT.jar -DgroupId=org.jaudiotagger -DartifactId=jaudiotagger -Dversion=2.2.6-SNAPSHOT -Dpackaging=jar
+@REM mvn install:install-file -Dfile=.\src\main\resources\lib\mysql-connector-j-8.3.0.jar -DgroupId=com.mysql -DartifactId=mysql-connector-j -Dversion=8.3.0 -Dpackaging=jar

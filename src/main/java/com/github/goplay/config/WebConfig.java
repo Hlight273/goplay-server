@@ -13,6 +13,7 @@ public class WebConfig implements WebMvcConfigurer {
         //用户拦截器，除了以下三个白名单，都应该被拦截
         registry.addInterceptor(new UserInterceptor())
                 .excludePathPatterns("/user/login", "/user/register","ws")
+                .excludePathPatterns("/api/user/login", "/api/user/register","/api/ws")
                 .addPathPatterns("/**");
     }
 

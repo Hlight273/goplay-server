@@ -1,6 +1,7 @@
 file:
   upload-dir:
-    audio: E:\xxx
+    #audio: E:\xxx
+    audio: /home/username/upload
 jwt:
   replayatk:
     tolerance: 5

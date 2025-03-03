@@ -1,15 +1,20 @@
 package com.github.goplay.controller;
 
 import com.github.goplay.dto.UserInfo;
+import com.github.goplay.dto.VipInfo;
 import com.github.goplay.entity.Room;
 import com.github.goplay.entity.User;
+import com.github.goplay.entity.UserVip;
 import com.github.goplay.service.RoomService;
 import com.github.goplay.service.UserService;
 import com.github.goplay.utils.JwtUtils;
 import com.github.goplay.utils.Result;
 import com.github.goplay.utils.UserUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+
+import java.sql.Timestamp;
 
 @RestController
 @RequestMapping("/user")
@@ -48,17 +53,6 @@ public class UserController {
         }
     }
 
-    //返回给前端用户信息
-    @GetMapping("/info")
-    public Result info(String token){
-        String username = JwtUtils.getClaimsByToken(token).getSubject();//下面是个灰色头像
-        String avatorUrl = UserUtils.getAvatar();
-        UserInfo userInfo = new UserInfo(0, username, avatorUrl);
-        return Result.ok()
-                .oData(userInfo)
-                .message("返回用户数据成功");
-    }
-
     @PostMapping("/logout")
     public Result logout(){
         return Result.ok().message("登出成功");
@@ -90,4 +84,33 @@ public class UserController {
         }
     }
 
+    @GetMapping("/{userId}/vipInfo")
+    public Result userVipInfo(@PathVariable Integer userId){
+        VipInfo vipInfo = userService.getVipInfoByUserId(userId);
+        if(vipInfo != null){
+            return Result.ok()
+                    .oData(vipInfo)
+                    .message("查询成功");
+        }else {
+            return Result.empty()
+                    .message("查询为空！");
+        }
+    }
+
+    @Transactional
+    @PostMapping("/{userId}/renew/vipInfo")
+    public Result renewVipInfo(@PathVariable Integer userId, int vipLevel, Timestamp startTime, int validDays){
+        //假设已经经过支付系统鉴权
+        boolean renewSuccess = userService.renewUserVipInfo(userId,vipLevel, startTime, validDays);
+        if(renewSuccess){
+            VipInfo targetVipInfo = userService.getVipInfoByUserId(userId);
+            if(targetVipInfo!=null){
+                return Result.ok()
+                        .oData(targetVipInfo)
+                        .message("获得vip成功");
+            }
+        }
+        return Result.error()
+                .message("获取vip失败！");
+    }
 }

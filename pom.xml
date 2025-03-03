@@ -33,8 +33,8 @@
 			<groupId>com.mysql</groupId>
 			<artifactId>mysql-connector-j</artifactId>
 			<version>8.3.0</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/src/main/resources/lib/mysql-connector-j-8.3.0.jar</systemPath>
+<!--			<scope>system</scope>-->
+<!--			<systemPath>${project.basedir}/src/main/resources/lib/mysql-connector-j-8.3.0.jar</systemPath>-->
 		</dependency>
 
 
@@ -52,11 +52,11 @@
 			<version>2.3.0</version>
 		</dependency>
 
-		<dependency>
-			<groupId>mysql</groupId>
-			<artifactId>mysql-connector-java</artifactId>
-			<version>8.0.33</version>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>mysql</groupId>-->
+<!--			<artifactId>mysql-connector-java</artifactId>-->
+<!--			<version>8.0.33</version>-->
+<!--		</dependency>-->
 
 		<dependency>
 			<groupId>com.baomidou</groupId>
@@ -106,22 +106,55 @@
 <!--		</dependency>-->
 
 		<dependency>
-			<groupId>org</groupId>
+			<groupId>org.jaudiotagger</groupId>
 			<artifactId>jaudiotagger</artifactId>
-			<version>2.2.6</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/src/main/resources/lib/jaudiotagger-2.2.6-SNAPSHOT.jar</systemPath>
+			<version>2.2.6-SNAPSHOT</version>
+<!--			<scope>system</scope>-->
+<!--			<systemPath>${project.basedir}/src/main/resources/lib/jaudiotagger-2.2.6-SNAPSHOT.jar</systemPath>-->
 		</dependency>
+
+
+
 
     </dependencies>
 
 	<build>
 		<plugins>
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>3.2.0</version>
+				<executions>
+					<execution>
+						<id>copy-jaudiotagger</id>
+						<phase>package</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.build.directory}</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${project.basedir}/src/main/resources/lib</directory>
+									<includes>
+										<include>jaudiotagger-2.2.6-SNAPSHOT.jar</include>
+									</includes>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<mainClass>com.github.goplay.MyJwtApplication</mainClass>
+				</configuration>
+				<version>3.3.0</version>
 			</plugin>
 		</plugins>
+
 	</build>
 
 </project>

@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 
+import static com.github.goplay.utils.FileUtils.fillEmptyNamesForSongInfo;
+
 @Service
 public class SongInfoService {
     @Autowired
@@ -23,6 +25,7 @@ public class SongInfoService {
                 FileUtils.getAudioDuration(audioFile),
                 FileUtils.getAudioAlbum(audioFile),
                 FileUtils.getAudioSize(audioFile));
+        fillEmptyNamesForSongInfo(songInfo);
         return songInfoMapper.insert(songInfo);
     }
 
