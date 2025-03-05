@@ -1,5 +1,6 @@
 package com.github.goplay.dto;
 
+import com.github.goplay.entity.Song;
 import com.github.goplay.entity.SongInfo;
 
 public class SongContent {
@@ -14,8 +15,7 @@ public class SongContent {
         this.songUrl = songUrl;
     }
 
-    public SongContent() {
-    }
+    public SongContent(){}
 
     public SongInfo getSongInfo() {
         return songInfo;

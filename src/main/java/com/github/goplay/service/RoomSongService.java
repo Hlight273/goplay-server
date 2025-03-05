@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.github.goplay.dto.SongContent;
 import com.github.goplay.dto.UserInfo;
+import com.github.goplay.entity.PlaylistSong;
 import com.github.goplay.entity.RoomSong;
 import com.github.goplay.entity.Song;
 import com.github.goplay.entity.SongInfo;
@@ -60,15 +61,7 @@ public class RoomSongService {
         if (target_RoomSongs.isEmpty())
             return Collections.emptyList();
 
-        List<SongContent> songContentList = new ArrayList<>();
-        for (RoomSong rs : target_RoomSongs) {
-            Integer songId = rs.getSongId();
-            Song song = songService.getSongById(songId);
-            SongInfo songInfo = songInfoService.getSongInfoById(songId);
-            SongContent songContent = new SongContent(songInfo, getImgStrToBase64(song.getFileCoverPath()), getAudioFileNameByPath(song.getFilePath()));
-            songContentList.add(songContent);
-        }
-        return songContentList;
+        return convert_RoomSongList_to_SongContentList(target_RoomSongs);
     }
 
     @Transactional
@@ -90,5 +83,29 @@ public class RoomSongService {
                         .set("is_active", false)
         );
         return i > 0;
+    }
+
+    public List<SongContent> convert_RoomSongList_to_SongContentList(List<RoomSong> roomSongList) {
+        List<SongContent> songContentList = new ArrayList<>();
+        for (RoomSong rs : roomSongList) {
+            Integer songId = rs.getSongId();
+            Song song = songService.getSongById(songId);
+            SongInfo songInfo = songInfoService.getSongInfoById(songId);
+            SongContent songContent = new SongContent(songInfo, getImgStrToBase64(song.getFileCoverPath()), getAudioFileNameByPath(song.getFilePath()));
+            songContentList.add(songContent);
+        }
+        return songContentList;
+    }
+
+    public List<SongContent> convert_PlaylistSongList_to_SongContentList(List<PlaylistSong> plSongList) {
+        List<SongContent> songContentList = new ArrayList<>();
+        for (PlaylistSong pls : plSongList) {
+            Integer songId = pls.getSongId();
+            Song song = songService.getSongById(songId);
+            SongInfo songInfo = songInfoService.getSongInfoById(songId);
+            SongContent songContent = new SongContent(songInfo, getImgStrToBase64(song.getFileCoverPath()), getAudioFileNameByPath(song.getFilePath()));
+            songContentList.add(songContent);
+        }
+        return songContentList;
     }
 }
