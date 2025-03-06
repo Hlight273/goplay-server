@@ -12,8 +12,13 @@ import static com.github.goplay.utils.FileUtils.fillEmptyNamesForSongInfo;
 
 @Service
 public class SongInfoService {
-    @Autowired
-    SongInfoMapper songInfoMapper;
+
+
+    private final SongInfoMapper songInfoMapper;
+
+    public SongInfoService(SongInfoMapper songInfoMapper) {
+        this.songInfoMapper = songInfoMapper;
+    }
 
     public int addSongInfo(SongInfo songInfo) {
         return songInfoMapper.insert(songInfo);

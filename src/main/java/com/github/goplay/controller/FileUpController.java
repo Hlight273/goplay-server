@@ -28,22 +28,24 @@ public class FileUpController {
 
     @Value("${file.upload-dir.audio}")
     public String audioDir;
+    @Value("${file.upload-dir.image.playlist-cover}")
+    public String playlistCoverDir;
+    @Value("${file.upload-dir.image.user-avatar}")
+    public String userAvatarDir;
 
     private final ApplicationEventPublisher eventPublisher;
-    @Autowired
-    private PlaylistService playlistService;
-    @Autowired
-    private UserService userService;
+    private final RoomService roomService;
+    private final SongService songService;
+    private final PlaylistService playlistService;
+    private final UserService userService;
 
-    public FileUpController(ApplicationEventPublisher eventPublisher) {
+    public FileUpController(ApplicationEventPublisher eventPublisher, RoomService roomService, SongService songService, PlaylistService playlistService, UserService userService) {
         this.eventPublisher = eventPublisher;
+        this.roomService = roomService;
+        this.songService = songService;
+        this.playlistService = playlistService;
+        this.userService = userService;
     }
-
-    @Autowired
-    private RoomService roomService;
-
-    @Autowired
-    private SongService songService;
 
     @PostMapping("/audio/room/{roomCode}/audio")
     public Result UploadRoomAudio(@RequestParam("userId") Integer userId, @RequestParam("file") MultipartFile file,  @PathVariable String roomCode) {
@@ -108,18 +110,24 @@ public class FileUpController {
         }
     }
 
-
-    //@PostMapping("/upload")
-    public String UploadFile(String testname, MultipartFile file, HttpServletRequest request) throws IOException {
-        System.out.println(testname);
-        System.out.println(file.getOriginalFilename());
-        System.out.println(file.getContentType());
-
-        String path = request.getServletContext().getRealPath("/upload");
-        System.out.println(path);
-
-        FileUtils.saveFile(file,path);
-
-        return "文件"+file.getOriginalFilename()+"上传成功";
+    @PostMapping("/playlist/image")
+    public Result uploadPlaylistCover(@RequestParam("file") MultipartFile file) {
+        Result result = UploadUtils.getImageValidation(file);
+        if (result != null) {
+            return result;
+        } else {
+            String originalFilename = file.getOriginalFilename();
+            String postFix = null;
+            if (originalFilename != null) {
+                postFix = originalFilename.substring(originalFilename.lastIndexOf("."));
+            }
+            String fileName = UUID.randomUUID().toString() + postFix;
+            try {
+                String path = FileUtils.saveFile(file, playlistCoverDir, fileName);
+                return Result.ok().oData(fileName).message("歌单封面上传成功！");
+            } catch (Exception e) {
+                return Result.error().message("歌单封面上传失败！");
+            }
+        }
     }
 }

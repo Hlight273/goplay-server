@@ -24,12 +24,14 @@ import static com.github.goplay.utils.FileUtils.getImgStrToBase64;
 @Service
 public class RoomSongService {
 
-    @Autowired
-    private RoomSongMapper roomSongMapper;
-    @Autowired
-    private UserService userService;
+
 
     private SongService songService;
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private RoomSongMapper roomSongMapper;
+
     @Lazy
     @Autowired
     public void setSongService(SongService songService) {

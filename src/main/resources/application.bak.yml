@@ -1,7 +1,13 @@
 file:
   upload-dir:
-    #audio: E:\xxx
-    audio: /home/username/upload
+    audio: E:\xxx\upload
+    image:
+      playlist-cover: E:\xxx\upload\image\playlist-cover
+      user-avatar: E:\xxx\upload\image\user-avatar
+    #audio: /home/username/upload/audio
+    #image:
+    #  playlist-cover: /home/username/upload
+    #  user-avatar: /home/username/upload
 jwt:
   replayatk:
     tolerance: 5

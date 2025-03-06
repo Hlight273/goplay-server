@@ -20,14 +20,16 @@ import java.util.stream.Collectors;
 @Service
 public class RoomUserService {
 
-    @Autowired
-    private UserMapper userMapper;
 
-    @Autowired
-    private RoomMapper roomMapper;
+    private final RoomUserMapper roomUserMapper;
+    private final RoomMapper roomMapper;
+    private final UserMapper userMapper;
 
-    @Autowired
-    private RoomUserMapper roomUserMapper;
+    public RoomUserService(RoomUserMapper roomUserMapper, RoomMapper roomMapper, UserMapper userMapper) {
+        this.roomUserMapper = roomUserMapper;
+        this.roomMapper = roomMapper;
+        this.userMapper = userMapper;
+    }
 
     public Room isUserInRoom(Integer userId){
         RoomUser lastRoomUser = roomUserMapper.selectOne(

@@ -2,15 +2,11 @@ package com.github.goplay.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.github.goplay.dto.PlaylistInfo;
 import com.github.goplay.dto.UserInfo;
 import com.github.goplay.dto.VipInfo;
-import com.github.goplay.entity.RoomUser;
-import com.github.goplay.entity.User;
-import com.github.goplay.entity.UserVip;
-import com.github.goplay.mapper.RoomMapper;
-import com.github.goplay.mapper.RoomUserMapper;
-import com.github.goplay.mapper.UserMapper;
-import com.github.goplay.mapper.UserVipMapper;
+import com.github.goplay.entity.*;
+import com.github.goplay.mapper.*;
 import com.github.goplay.utils.PrivilegeCode;
 import com.github.goplay.utils.UserUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,23 +15,27 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.github.goplay.utils.CommonUtils.getDaysDiff;
 
 @Service
 public class UserService {
-    @Autowired
-    private UserMapper userMapper;
 
-    @Autowired
-    private RoomMapper roomMapper;
 
-    @Autowired
-    private RoomUserMapper roomUserMapper;
-    @Autowired
-    private RoomUserService roomUserService;
-    @Autowired
-    private UserVipMapper userVipMapper;
+    private final UserVipMapper userVipMapper;
+    private final RoomUserMapper roomUserMapper;
+    private final RoomUserService roomUserService;
+    private final UserMapper userMapper;
+
+    public UserService(UserVipMapper userVipMapper, RoomUserMapper roomUserMapper, RoomUserService roomUserService, UserMapper userMapper) {
+        this.userVipMapper = userVipMapper;
+        this.roomUserMapper = roomUserMapper;
+        this.roomUserService = roomUserService;
+        this.userMapper = userMapper;
+    }
 
     public User getUserByLoginInfo(User user) {
         User queryUser = new User(user.getUsername(), user.getPassword());
@@ -119,7 +119,6 @@ public class UserService {
     }
 
 
-
     //vip信息
     public boolean renewUserVipInfo(Integer userId, int vipLevel, Timestamp startTime, int validDays){
         UserVip targetUserVip = getUserVipById(userId);
@@ -151,4 +150,8 @@ public class UserService {
         updateWrapper.eq(UserVip::getId,userVip.getId());
         return userVipMapper.update(userVip,updateWrapper) == 1;
     }
+
+
+
+
 }

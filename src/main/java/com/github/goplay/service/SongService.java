@@ -16,22 +16,18 @@ import java.io.File;
 @Service
 public class SongService {
 
-    @Autowired
-    private SongMapper songMapper;
-    @Autowired
-    private SongInfoService songInfoService;
 
-    private RoomSongService roomSongService;
-    @Autowired
-    private PlaylistSongMapper playlistSongMapper;
-    @Autowired
-    private PlaylistSongService playlistSongService;
+    private final RoomSongService roomSongService;
+    private final PlaylistSongService playlistSongService;
+    private final SongMapper songMapper;
+    private final SongInfoService songInfoService;
 
-    @Autowired
-    public void setRoomSongService(RoomSongService roomSongService){
+    public SongService(RoomSongService roomSongService, PlaylistSongService playlistSongService, SongMapper songMapper, SongInfoService songInfoService) {
         this.roomSongService = roomSongService;
+        this.playlistSongService = playlistSongService;
+        this.songMapper = songMapper;
+        this.songInfoService = songInfoService;
     }
-
 
     @Transactional
     public int addSong4Room(MultipartFile file, Room room, Integer userId, String path, String fileName) {

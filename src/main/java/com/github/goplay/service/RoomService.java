@@ -20,15 +20,16 @@ import java.util.List;
 @Service
 public class RoomService {
     public static final int MAX_ROOM_COUNT = 6;
+    private final RoomMapper roomMapper;
+    private final UserMapper userMapper;
+    private final RoomUserMapper roomUserMapper;
 
-    @Autowired
-    private UserMapper userMapper;
+    public RoomService(RoomMapper roomMapper, UserMapper userMapper, RoomUserMapper roomUserMapper) {
+        this.roomMapper = roomMapper;
+        this.userMapper = userMapper;
+        this.roomUserMapper = roomUserMapper;
+    }
 
-    @Autowired
-    private RoomMapper roomMapper;
-
-    @Autowired
-    private RoomUserMapper roomUserMapper;
 
     // 创建房间
     @Transactional

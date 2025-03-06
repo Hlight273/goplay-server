@@ -1,24 +1,26 @@
 package com.github.goplay.controller;
 
 import com.github.goplay.dto.PlaylistInfo;
-import com.github.goplay.dto.SongContent;
+import com.github.goplay.dto.newDTO.PlaylistFormDTO;
 import com.github.goplay.entity.Playlist;
 import com.github.goplay.service.PlaylistService;
+import com.github.goplay.service.PlaylistSongService;
+import com.github.goplay.service.UserService;
+import com.github.goplay.utils.JwtUtils;
 import com.github.goplay.utils.Result;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
+import com.github.goplay.utils.UserUtils;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/playlist")
 public class PlaylistController {
     private final PlaylistService playlistService;
+    private final PlaylistSongService playlistSongService;
 
-    public PlaylistController(PlaylistService playlistService) {
+    public PlaylistController(PlaylistService playlistService, UserService userService, PlaylistSongService playlistSongService) {
         this.playlistService = playlistService;
+        this.playlistSongService = playlistSongService;
     }
 
     @GetMapping("/{playlistId}/info")
@@ -34,32 +36,64 @@ public class PlaylistController {
         }
     }
 
-//    //查
-//    @GetMapping("/{playlistId}/songs")
-//    public Result SongContentListFromPlaylist(@PathVariable Integer playlistId){
-//        List<SongContent> SongContentList = playlistService.getPublicSongContentList_by_playlistId(playlistId);
-//        if(SongContentList != null){
-//            return Result.ok()
-//                    .oData(SongContentList)
-//                    .message("查询成功");
-//        }else {
-//            return Result.empty()
-//                    .message("查询为空！");
-//        }
-//    }
-//
-//    @GetMapping("/{playlistId}")
-//    public Result Playlist(@PathVariable Integer playlistId){
-//        Playlist playlist = playlistService.getPublicPlaylist_by_playlistId(playlistId);
-//        if(playlist != null){
-//            return Result.ok()
-//                    .oData(playlist)
-//                    .message("查询成功");
-//        }else {
-//            return Result.empty()
-//                    .message("查询为空！");
-//        }
-//    }
 
+    @Transactional
+    @PostMapping
+    public Result addPlaylist(@RequestHeader("token") String token, @RequestBody PlaylistFormDTO playlistForm){
+        Integer requestUserId = JwtUtils.getUserIdFromToken(token);
+        int playlistIndex =  playlistService.addPlaylist(new Playlist(requestUserId, playlistForm.getTitle(), playlistForm.getDescription(), playlistForm.getCoverUrl(), playlistForm.getIsPublic()));
+        Playlist targetPlaylist = playlistService.getPlaylistById(playlistIndex);
+        if(playlistIndex>0){
+            return Result.ok().oData(targetPlaylist).message("新建用户歌单成功！");
+        }else {
+            return Result.error().message("新建用户歌单失败！");
+        }
+    }
+
+    @Transactional
+    @PutMapping("/{playlistId}")
+    public Result updatePlaylist(@RequestHeader("token") String token,
+                                 @PathVariable Integer playlistId,
+                                 @RequestBody PlaylistFormDTO playlistForm) {
+        Integer requestUserId = JwtUtils.getUserIdFromToken(token);
+        Playlist existingPlaylist = playlistService.getPlaylistById(playlistId);
+        if (existingPlaylist == null) {
+            return Result.error().message("歌单不存在！");
+        }
+        if (!UserUtils.hasPlaylistPermission_by_userId(existingPlaylist, requestUserId)) {
+            return Result.error().message("无权限修改该歌单！");
+        }
+        existingPlaylist.setTitle(playlistForm.getTitle());
+        existingPlaylist.setDescription(playlistForm.getDescription());
+        existingPlaylist.setCoverUrl(playlistForm.getCoverUrl());
+        existingPlaylist.setIsPublic(playlistForm.getIsPublic());
+
+        boolean updated = playlistService.updatePlaylist(existingPlaylist)>-1;
+
+        if (updated) {
+            return Result.ok().oData(existingPlaylist).message("歌单更新成功！");
+        } else {
+            return Result.error().message("歌单更新失败！");
+        }
+    }
+
+    @Transactional
+    @DeleteMapping("/{playlistId}")
+    public Result removePlaylist(@RequestHeader("token") String token, @PathVariable Integer playlistId){
+        Integer requestUserId = JwtUtils.getUserIdFromToken(token);
+        Playlist existingPlaylist = playlistService.getPlaylistById(playlistId);
+        if (existingPlaylist == null) {
+            return Result.error().message("歌单不存在！");
+        }
+        if (!UserUtils.hasPlaylistPermission_by_userId(existingPlaylist, requestUserId)) {
+            return Result.error().message("无权限删除该歌单！");
+        }
+        boolean success = playlistService.removePlaylist(playlistId)>-1;
+        if(success){
+            return Result.ok().oData(true).message("删除歌单成功！");
+        }else {
+            return Result.error().oData(false).message("删除歌单失败！");
+        }
+    }
 
 }

@@ -40,6 +40,14 @@ public class Playlist {
         this.isPublic = isPublic;
     }
 
+    public Playlist(Integer userId, String title, String description, String coverUrl,Integer isPublic) {
+        this.userId = userId;
+        this.title = title;
+        this.description = description;
+        this.coverUrl = coverUrl;
+        this.isPublic = isPublic;
+    }
+
     public Playlist() {
     }
 

@@ -17,7 +17,7 @@ public class JwtUtils {
     private static final String TOKEN_SECRET = "1145141919810xd";
 
 
-    public static String generateToken(String username){
+    public static String generateToken(Integer userId, String username){
         Date now = new Date();
         Date expiration = new Date(now.getTime() + 1000*TOKEN_TIME_OUT);
         long timestamp = System.currentTimeMillis() / 1000; // 增加当前时间戳
@@ -25,6 +25,7 @@ public class JwtUtils {
                 .setHeaderParam("type","JWT")
                 .setSubject(username)
                 .setIssuedAt(now)
+                .claim("userId", userId)
                 .claim("timestamp", timestamp) // 添加时间戳到payload
                 .setExpiration(expiration)
                 .signWith(SignatureAlgorithm.HS512, TOKEN_SECRET)
@@ -36,5 +37,15 @@ public class JwtUtils {
                 .setSigningKey(TOKEN_SECRET)
                 .parseClaimsJws(token)
                 .getBody();
+    }
+
+    ///jwt中解析用户Id，用于查询请求的真正用户Id
+    public static Integer getUserIdFromToken(String token) {
+        Claims claims = Jwts.parser()
+                .setSigningKey(TOKEN_SECRET)
+                .parseClaimsJws(token)
+                .getBody();
+
+        return claims.get("userId", Integer.class);
     }
 }

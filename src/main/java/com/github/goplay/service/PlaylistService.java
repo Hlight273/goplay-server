@@ -5,37 +5,42 @@ import com.github.goplay.dto.PlaylistInfo;
 import com.github.goplay.dto.SongContent;
 import com.github.goplay.entity.Playlist;
 import com.github.goplay.entity.PlaylistSong;
-import com.github.goplay.entity.User;
 import com.github.goplay.mapper.PlaylistMapper;
 import com.github.goplay.mapper.PlaylistSongMapper;
-import com.github.goplay.mapper.SongMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class PlaylistService {
-    @Autowired
-    private PlaylistSongMapper playlistSongMapper;
-    @Autowired
-    private SongMapper songMapper;
-    @Autowired
-    private RoomSongService roomSongService;
-    @Autowired
-    private PlaylistMapper playlistMapper;
 
-    @Transactional
+
+    private final PlaylistSongMapper playlistSongMapper;
+    private final RoomSongService roomSongService;
+    private final PlaylistMapper playlistMapper;
+
+    public PlaylistService(PlaylistSongMapper playlistSongMapper, RoomSongService roomSongService, PlaylistMapper playlistMapper) {
+        this.playlistSongMapper = playlistSongMapper;
+        this.roomSongService = roomSongService;
+        this.playlistMapper = playlistMapper;
+    }
+
     public PlaylistInfo getPublicPlaylistInfo_by_playlistId(Integer playlistId){
         Playlist playlist = getPublicPlaylist_by_playlistId(playlistId);
-        List<SongContent> songContentList = getPublicSongContentList_by_playlistId(playlistId);
+        List<SongContent> songContentList = getSongContentList_by_playlistId(playlistId);
         return new PlaylistInfo(playlist, songContentList);
     }
 
-    private List<SongContent> getPublicSongContentList_by_playlistId(Integer playlistId){
+    public PlaylistInfo getPlaylistInfo_by_playlistId(Integer playlistId){
+        Playlist playlist = getPlaylist_by_playlistId(playlistId);
+        List<SongContent> songContentList = getSongContentList_by_playlistId(playlistId);
+        return new PlaylistInfo(playlist, songContentList);
+    }
+
+    private List<SongContent> getSongContentList_by_playlistId(Integer playlistId){
         List<PlaylistSong> playlistSongs = playlistSongMapper.selectList(
                 new QueryWrapper<PlaylistSong>()
                         .eq("playlist_id", playlistId)
@@ -65,6 +70,68 @@ public class PlaylistService {
         );
         return playlist;
     }
+
+    //用户歌单
+    public List<PlaylistInfo> get_PlaylistInfoList_ByOwnerId(Integer userId) {
+        List<Playlist> playlists = playlistMapper.selectList(
+                new QueryWrapper<Playlist>()
+                        .eq("user_id", userId)
+                        .eq("is_active", 1)
+        );
+        List<Integer> playlistIds = playlists.stream()
+                .map(Playlist::getId)
+                .collect(Collectors.toList());
+        List<PlaylistInfo> playlistInfos = new ArrayList<>();
+        for(Integer playlistId : playlistIds){
+            PlaylistInfo playlistInfo = getPlaylistInfo_by_playlistId(playlistId);
+            if(playlistInfo!=null)
+                playlistInfos.add(playlistInfo);
+        }
+        return playlistInfos;
+    }
+    public List<PlaylistInfo> get_PublicPlaylistInfoList_ByOwnerId(Integer userId) {
+        List<Playlist> playlists = playlistMapper.selectList(
+                new QueryWrapper<Playlist>()
+                        .eq("user_id", userId)
+                        .eq("is_active", 1)
+        );
+        List<Integer> playlistIds = playlists.stream()
+                .map(Playlist::getId)
+                .collect(Collectors.toList());
+        List<PlaylistInfo> playlistInfos = new ArrayList<>();
+        for(Integer playlistId : playlistIds){
+            PlaylistInfo playlistInfo = getPublicPlaylistInfo_by_playlistId(playlistId);
+            if(playlistInfo!=null)
+                playlistInfos.add(playlistInfo);
+        }
+        return playlistInfos;
+    }
+
+
+    public int addPlaylist(Playlist playlist){
+        if(playlistMapper.insert(playlist)>-1)
+            return playlist.getId();
+        return -1;
+    }
+
+    public int updatePlaylist(Playlist playlist){
+        if(playlistMapper.updateById(playlist)>-1)
+            return playlist.getId();
+        return -1;
+    }
+
+    public Playlist getPlaylistById(Integer playlistId){
+        Playlist playlist = playlistMapper.selectById(playlistId);
+        return playlist;
+    }
+
+    public int removePlaylist(Integer playlistId) {
+        Playlist playlist = playlistMapper.selectById(playlistId);
+        playlist.setIsActive(0);
+        return playlistMapper.updateById(playlist);
+    }
+
+
 
 
 }

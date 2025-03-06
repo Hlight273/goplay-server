@@ -14,11 +14,14 @@ public class GoplayMetaObjectHandler implements MetaObjectHandler {
         Timestamp now = new Timestamp(System.currentTimeMillis());
         this.strictInsertFill(metaObject, "createdAt", Timestamp.class, now);
         this.strictInsertFill(metaObject, "updatedAt", Timestamp.class, now);
+        this.strictUpdateFill(metaObject, "updateAt", Timestamp.class, new Timestamp(System.currentTimeMillis()));
         this.strictInsertFill(metaObject, "addedAt", Timestamp.class, now);
     }
 
     @Override
     public void updateFill(MetaObject metaObject) {
-        this.strictUpdateFill(metaObject, "updatedAt", Timestamp.class, new Timestamp(System.currentTimeMillis()));
+        Timestamp now = new Timestamp(System.currentTimeMillis());
+        this.strictUpdateFill(metaObject, "updatedAt", Timestamp.class, now);
+        this.strictUpdateFill(metaObject, "updateAt", Timestamp.class, now);
     }
 }

@@ -1,20 +1,23 @@
 package com.github.goplay.controller;
 
+import com.github.goplay.dto.PlaylistInfo;
 import com.github.goplay.dto.UserInfo;
 import com.github.goplay.dto.VipInfo;
 import com.github.goplay.entity.Room;
 import com.github.goplay.entity.User;
-import com.github.goplay.entity.UserVip;
+import com.github.goplay.service.PlaylistService;
 import com.github.goplay.service.RoomService;
 import com.github.goplay.service.UserService;
 import com.github.goplay.utils.JwtUtils;
 import com.github.goplay.utils.Result;
-import com.github.goplay.utils.UserUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.Timestamp;
+import java.util.List;
+
+import static com.github.goplay.utils.UserUtils.canCheckFullPlaylistInfo;
 
 @RestController
 @RequestMapping("/user")
@@ -25,6 +28,9 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+    @Autowired
+    private PlaylistService playlistService;
+
 
     //登录需要传入用户名和密文密码
     @PostMapping("/login")
@@ -34,7 +40,7 @@ public class UserController {
         if (targetUser == null) {
             return Result.error().message("用户名或密码不正确");
         }else{
-            String token = JwtUtils.generateToken(user.getUsername());
+            String token = JwtUtils.generateToken( targetUser.getId(), user.getUsername());
             return Result.ok()
                     .data("userid",targetUser.getId())
                     .data("username",targetUser.getUsername())
@@ -112,5 +118,25 @@ public class UserController {
         }
         return Result.error()
                 .message("获取vip失败！");
+    }
+
+    ///灵活查询，根据对比token的用户id和请求查询歌单拥有者id，判断是给全部歌单还是仅公开歌单，(负责人以上依旧所有歌单)
+    @Transactional
+    @GetMapping("/{playlistOwnerId}/playlist/info")
+    public Result userPlaylistInfo(@RequestHeader("token") String token, @PathVariable Integer playlistOwnerId){
+        List<PlaylistInfo> playlistInfos = null;
+        Integer requestUserId = JwtUtils.getUserIdFromToken(token);
+        if(canCheckFullPlaylistInfo(playlistOwnerId, requestUserId, userService)){
+            playlistInfos = playlistService.get_PlaylistInfoList_ByOwnerId(playlistOwnerId);
+        }else{
+            playlistInfos = playlistService.get_PublicPlaylistInfoList_ByOwnerId(playlistOwnerId);
+        }
+        if(playlistInfos!=null && playlistInfos.size()>0){
+            return Result.ok()
+                    .oData(playlistInfos)
+                    .message("查询用户歌单成功");
+        }
+        return Result.empty()
+                .message("查询用户歌单为空！");
     }
 }
