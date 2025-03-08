@@ -1,5 +1,6 @@
 package com.github.goplay.service;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.github.goplay.dto.PlaylistInfo;
@@ -24,7 +25,6 @@ import static com.github.goplay.utils.CommonUtils.getDaysDiff;
 @Service
 public class UserService {
 
-
     private final UserVipMapper userVipMapper;
     private final RoomUserMapper roomUserMapper;
     private final RoomUserService roomUserService;
@@ -37,21 +37,45 @@ public class UserService {
         this.userMapper = userMapper;
     }
 
-    public User getUserByLoginInfo(User user) {
-        User queryUser = new User(user.getUsername(), user.getPassword());
-        User resultUser = userMapper.selectOne(new QueryWrapper<>(queryUser));
-        return resultUser;
+    public User getUserByLoginInfo(User formUser) {
+        User targetUser = getUserByUsername(formUser.getUsername());
+        if (targetUser == null)
+            return null;
+        String rawPwd = formUser.getPassword();
+        String encryptedPwd = targetUser.getPassword();
+        if(UserUtils.verifyPassword(rawPwd, encryptedPwd))
+            return targetUser;
+        else
+            return null;
+    }
+    public boolean verifiedPwd(String rawPwd, Integer userId) {
+        User targetUser = userMapper.selectById(userId);
+        if (targetUser == null)
+            return false;
+        String encryptedPwd = targetUser.getPassword();
+        if(UserUtils.verifyPassword(rawPwd, encryptedPwd))
+            return true;
+        else
+            return false;
     }
 
     public int createUser(User user) {
-        int i = userMapper.insert(user);
+        String rawPwd = user.getPassword();
+        user.setPassword(UserUtils.encryptPassword(rawPwd));
+        int i = userMapper.insert(new User(0, user.getUsername(), user.getPassword(), 0));
         return i;
+    }
+
+    public User getUserByUsername(String username) {
+        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(User::getUsername, username);
+        return userMapper.selectOne(queryWrapper);
     }
 
     public UserInfo getUserInfoById(int id) {
         User user = userMapper.selectById(id);
         if (user == null) return null;
-        return new UserInfo(user.getId(),user.getUsername(), UserUtils.getAvatar(),user.getLevel());
+        return new UserInfo(user.getId(),user.getUsername(), UserUtils.getAvatar(),user.getLevel(), user.getNickname());
     }
 
     public Integer getUserPrivilegeInRoom(Integer roomId, Integer userId) {
@@ -118,6 +142,19 @@ public class UserService {
         return userInfo;
     }
 
+    public boolean updateUserNickname(Integer userId, String nickname) {
+        LambdaUpdateWrapper<User> wrapper = new LambdaUpdateWrapper<>();
+        wrapper.eq(User::getId, userId);
+        wrapper.set(User::getNickname, nickname);
+        return userMapper.update(wrapper)>0;
+    }
+
+    public boolean updateUserPwd(Integer userId, String rawPwd) {
+        LambdaUpdateWrapper<User> wrapper = new LambdaUpdateWrapper<>();
+        wrapper.eq(User::getId, userId);
+        wrapper.set(User::getPassword, UserUtils.encryptPassword(rawPwd));
+        return userMapper.update(wrapper)>0;
+    }
 
     //vip信息
     public boolean renewUserVipInfo(Integer userId, int vipLevel, Timestamp startTime, int validDays){

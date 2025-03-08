@@ -1,6 +1,8 @@
 package com.github.goplay.config;
 
 import com.github.goplay.interceptor.UserInterceptor;
+import com.github.goplay.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
@@ -16,10 +18,16 @@ public class WebConfig implements WebMvcConfigurer {
     @Value("${file.upload-dir.image.user-avatar}")
     public String userAvatarDir;
 
+    private final UserService userService;
+    @Autowired
+    public WebConfig(UserService userService) {
+        this.userService = userService;
+    }
+
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         //用户拦截器，除了以下三个白名单，都应该被拦截
-        registry.addInterceptor(new UserInterceptor())
+        registry.addInterceptor(new UserInterceptor(userService))
                 .excludePathPatterns("/user/login", "/user/register","ws")
                 .excludePathPatterns("/api/user/login", "/api/user/register","/api/ws")
                 .excludePathPatterns("/static/**")

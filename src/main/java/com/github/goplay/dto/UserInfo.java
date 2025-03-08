@@ -7,20 +7,23 @@ public class UserInfo {
     private Integer room_id;
     private Integer privilege;
     private Integer level;
+    private String nickname;
 
-    public UserInfo(Integer id, String username, String avatarUrl, Integer level) {
+    public UserInfo(Integer id, String username, String avatarUrl, Integer level, String nickname) {
         this.id = id;
         this.username = username;
         this.avatarUrl = avatarUrl;
         this.level = level;
+        this.nickname = nickname;
     }
 
-    public UserInfo(Integer id, String username, String avatarUrl, Integer room_id, Integer privilege) {
+    public UserInfo(Integer id, String username, String avatarUrl, Integer room_id, Integer privilege, String nickname) {
         this.id = id;
         this.username = username;
         this.avatarUrl = avatarUrl;
         this.room_id = room_id;
         this.privilege = privilege;
+        this.nickname = nickname;
     }
 
     public UserInfo() {
@@ -72,5 +75,13 @@ public class UserInfo {
 
     public void setLevel(Integer level) {
         this.level = level;
+    }
+
+    public String getNickname() {
+        return nickname;
+    }
+
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
     }
 }

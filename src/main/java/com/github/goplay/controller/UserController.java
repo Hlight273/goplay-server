@@ -10,6 +10,7 @@ import com.github.goplay.service.RoomService;
 import com.github.goplay.service.UserService;
 import com.github.goplay.utils.JwtUtils;
 import com.github.goplay.utils.Result;
+import com.github.goplay.utils.UserUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -23,14 +24,15 @@ import static com.github.goplay.utils.UserUtils.canCheckFullPlaylistInfo;
 @RequestMapping("/user")
 public class UserController {
 
-    @Autowired
-    private RoomService roomService;
+    private final UserService userService;
+    private final RoomService roomService;
+    private final PlaylistService playlistService;
 
-    @Autowired
-    private UserService userService;
-    @Autowired
-    private PlaylistService playlistService;
-
+    public UserController(UserService userService, RoomService roomService, PlaylistService playlistService) {
+        this.userService = userService;
+        this.roomService = roomService;
+        this.playlistService = playlistService;
+    }
 
     //登录需要传入用户名和密文密码
     @PostMapping("/login")
@@ -51,6 +53,9 @@ public class UserController {
 
     @PostMapping("/register")
     public Result register(@RequestBody User user){
+        if(userService.getUserByUsername(user.getUsername()) != null){
+            return Result.error().message("用户名已存在！");
+        }
         int i = userService.createUser(user);
         if(i>0){
             return Result.ok().message("注册成功");
@@ -100,6 +105,29 @@ public class UserController {
         }else {
             return Result.empty()
                     .message("查询为空！");
+        }
+    }
+
+    @PutMapping("/nickname")
+    public Result updateNickname(@RequestHeader("token") String token, @RequestParam("newNickname") String newNickname){
+        Integer requestUserId = JwtUtils.getUserIdFromToken(token);
+        if(userService.updateUserNickname(requestUserId, newNickname)){
+            return Result.ok().oData(true).message("昵称修改成功！");
+        }else{
+            return Result.error().message("昵称修改失败！");
+        }
+    }
+
+    @PutMapping("/pwd")
+    public Result updatePwd(@RequestHeader("token") String token, @RequestParam("oldPwd") String oldPwd, @RequestParam("newPwd") String newPwd){
+        Integer requestUserId = JwtUtils.getUserIdFromToken(token);
+        if(!userService.verifiedPwd(oldPwd, requestUserId)){
+            return Result.error().message("密码错误！");
+        }
+        if(userService.updateUserPwd(requestUserId, newPwd)){
+            return Result.ok().oData(true).message("密码修改成功！");
+        }else{
+            return Result.error().message("密码修改失败！");
         }
     }
 

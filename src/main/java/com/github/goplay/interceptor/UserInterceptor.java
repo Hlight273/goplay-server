@@ -1,6 +1,9 @@
 package com.github.goplay.interceptor;
 
+import com.github.goplay.dto.UserInfo;
+import com.github.goplay.entity.User;
 import com.github.goplay.exception.TokenValidationException;
+import com.github.goplay.service.UserService;
 import com.github.goplay.utils.JwtUtils;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,6 +16,7 @@ public class UserInterceptor implements HandlerInterceptor {
 
     @Value("${jwt.replayatk.tolerance}")
     private long tolerance;
+    private final UserService userService;
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
@@ -33,7 +37,8 @@ public class UserInterceptor implements HandlerInterceptor {
         }
         try {
             Claims claims = JwtUtils.getClaimsByToken(token);
-            if (claims == null) {
+            UserInfo targetUser = userService.getUserInfoById(claims.get("userId", Integer.class));
+            if (claims == null || targetUser==null) {
                 throw new TokenValidationException(token, "用户不存在");
             }
             return true;
@@ -42,5 +47,10 @@ public class UserInterceptor implements HandlerInterceptor {
         } catch (Exception e) {
             throw new TokenValidationException(token, "token失效");
         }
+    }
+
+
+    public UserInterceptor(UserService userService) {
+        this.userService = userService;
     }
 }

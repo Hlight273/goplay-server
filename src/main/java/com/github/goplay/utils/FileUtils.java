@@ -149,9 +149,9 @@ public class FileUtils {
         return fileName;
     }
 
-    public static void fillEmptyNamesForSongInfo(SongInfo songInfo){
+    public static void fillEmptyNamesForSongInfo(SongInfo songInfo, String originName){
         if(songInfo.getSongName().isEmpty())
-            songInfo.setSongName("未知歌曲");
+            songInfo.setSongName(originName==null||originName.isEmpty()?"未知歌曲":originName);
         if(songInfo.getSongArtist().isEmpty())
             songInfo.setSongArtist("未知艺术家");
         if(songInfo.getSongAlbum().isEmpty())
@@ -254,5 +254,10 @@ public class FileUtils {
             }
         }
         return flag;
+    }
+
+    ///带后缀的变成没后缀的
+    public static String getFileName(MultipartFile file){
+        return file.getOriginalFilename().substring(0, file.getOriginalFilename().lastIndexOf("."));
     }
 }

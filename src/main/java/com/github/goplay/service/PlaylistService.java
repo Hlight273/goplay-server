@@ -81,13 +81,7 @@ public class PlaylistService {
         List<Integer> playlistIds = playlists.stream()
                 .map(Playlist::getId)
                 .collect(Collectors.toList());
-        List<PlaylistInfo> playlistInfos = new ArrayList<>();
-        for(Integer playlistId : playlistIds){
-            PlaylistInfo playlistInfo = getPlaylistInfo_by_playlistId(playlistId);
-            if(playlistInfo!=null)
-                playlistInfos.add(playlistInfo);
-        }
-        return playlistInfos;
+        return get_PlaylistInfoList_ByPlaylistIds(playlistIds);
     }
     public List<PlaylistInfo> get_PublicPlaylistInfoList_ByOwnerId(Integer userId) {
         List<Playlist> playlists = playlistMapper.selectList(
@@ -98,15 +92,18 @@ public class PlaylistService {
         List<Integer> playlistIds = playlists.stream()
                 .map(Playlist::getId)
                 .collect(Collectors.toList());
+        return get_PlaylistInfoList_ByPlaylistIds(playlistIds);
+    }
+
+    public List<PlaylistInfo> get_PlaylistInfoList_ByPlaylistIds(List<Integer> playlistIds) {
         List<PlaylistInfo> playlistInfos = new ArrayList<>();
         for(Integer playlistId : playlistIds){
-            PlaylistInfo playlistInfo = getPublicPlaylistInfo_by_playlistId(playlistId);
+            PlaylistInfo playlistInfo = getPlaylistInfo_by_playlistId(playlistId);
             if(playlistInfo!=null)
                 playlistInfos.add(playlistInfo);
         }
         return playlistInfos;
     }
-
 
     public int addPlaylist(Playlist playlist){
         if(playlistMapper.insert(playlist)>-1)

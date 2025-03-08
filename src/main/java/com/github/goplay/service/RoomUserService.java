@@ -79,6 +79,7 @@ public class RoomUserService {
                     userInfo.setAvatarUrl(UserUtils.getAvatar());
                     userInfo.setPrivilege(roomUser.getPrivilege());
                     userInfo.setLevel(user.getLevel());
+                    userInfo.setNickname(user.getNickname());
                     return userInfo;
                 } else {
                     return null; // 返回 null 或者处理方式

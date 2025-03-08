@@ -24,13 +24,13 @@ public class SongInfoService {
         return songInfoMapper.insert(songInfo);
     }
 
-    public int addSongInfo(Integer songId, File audioFile) {
+    public int addSongInfo(Integer songId, File audioFile, String originName) {
         SongInfo songInfo = new SongInfo(songId, FileUtils.getAudioName(audioFile),
                 FileUtils.getAudioArtist(audioFile),
                 FileUtils.getAudioDuration(audioFile),
                 FileUtils.getAudioAlbum(audioFile),
                 FileUtils.getAudioSize(audioFile));
-        fillEmptyNamesForSongInfo(songInfo);
+        fillEmptyNamesForSongInfo(songInfo, originName);
         return songInfoMapper.insert(songInfo);
     }
 

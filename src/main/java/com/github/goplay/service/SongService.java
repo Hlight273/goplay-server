@@ -91,7 +91,7 @@ public class SongService {
         if (cntSong <= 0)
             return null;
 
-        int cntSongInfo = songInfoService.addSongInfo(song.getId(), f); //表song_info insert
+        int cntSongInfo = songInfoService.addSongInfo(song.getId(), f, FileUtils.getFileName(file)); //表song_info insert
         if (cntSongInfo <= 0)
             return null;
         return song;
