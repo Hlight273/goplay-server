@@ -1,7 +1,9 @@
 package com.github.goplay.controller;
 
+import com.github.goplay.dto.SongContent;
 import com.github.goplay.entity.Playlist;
 import com.github.goplay.entity.Room;
+import com.github.goplay.entity.Song;
 import com.github.goplay.entity.User;
 import com.github.goplay.event.EventType;
 import com.github.goplay.event.RoomUpdateEvent;
@@ -66,10 +68,11 @@ public class FileUpController {
             String fileName = UUID.randomUUID().toString() + postFix; //+ "_" + originalFilename;
             String path = FileUtils.saveFile(file, audioDir, fileName);
 
-            int i = songService.addSong4Room(file,room,userId,path,fileName);
-            if(i>0){
+            SongContent songContent = songService.addSong4Room(file,room,userId,path,fileName);
+            if(songContent!=null){
                 eventPublisher.publishEvent(new RoomUpdateEvent(this, room.getId(), EventType.ROOM_SONG_LIST));
                 return Result.ok()
+                        .oData(songContent)
                         .message("音频"+originalFilename+"上传成功！");
             }
             else
@@ -99,9 +102,10 @@ public class FileUpController {
             String fileName = UUID.randomUUID().toString() + postFix; //+ "_" + originalFilename;
             String path = FileUtils.saveFile(file, audioDir, fileName);
 
-            int i = songService.addSong4Playlist(file,playlist,userId,path,fileName);
-            if(i>0){
+            SongContent songContent = songService.addSong4Playlist(file,playlist,userId,path,fileName);
+            if(songContent!=null){
                 return Result.ok()
+                        .oData(songContent)
                         .message("音频"+originalFilename+"上传成功！");
             }
             else

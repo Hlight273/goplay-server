@@ -1,9 +1,9 @@
 package com.github.goplay.service;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.github.goplay.dto.UserInfo;
-import com.github.goplay.entity.PlaylistSong;
-import com.github.goplay.entity.RoomSong;
-import com.github.goplay.entity.User;
+import com.github.goplay.entity.*;
 import com.github.goplay.mapper.PlaylistSongMapper;
 import org.springframework.stereotype.Service;
 
@@ -23,5 +23,22 @@ public class PlaylistSongService {
             return -1;
         PlaylistSong playlistSong = new PlaylistSong(0, playlistId, songId, userId, userInfo.getUsername());
         return playlistSongMapper.insert(playlistSong);
+    }
+
+    ///给pls表记录is_active设为false，返回其id或-1
+    public int removePlaylistSong(Integer playlistId, Integer songId) {
+        LambdaQueryWrapper<PlaylistSong> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(PlaylistSong::getPlaylistId, playlistId)
+                .eq(PlaylistSong::getSongId, songId)
+                .eq(PlaylistSong::getIsActive, 1);
+        PlaylistSong playlistSong = playlistSongMapper.selectOne(wrapper);
+        if(playlistSong==null)
+            return -1;
+        playlistSong.setIsActive(0);
+        boolean success = playlistSongMapper.updateById(playlistSong)>-1;
+        if(success)
+            return playlistSong.getId();
+        else
+            return -1;
     }
 }

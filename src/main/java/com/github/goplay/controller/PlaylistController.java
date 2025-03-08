@@ -1,8 +1,10 @@
 package com.github.goplay.controller;
 
 import com.github.goplay.dto.PlaylistInfo;
+import com.github.goplay.dto.UserInfo;
 import com.github.goplay.dto.newDTO.PlaylistFormDTO;
 import com.github.goplay.entity.Playlist;
+import com.github.goplay.entity.PlaylistSong;
 import com.github.goplay.service.PlaylistService;
 import com.github.goplay.service.PlaylistSongService;
 import com.github.goplay.service.UserService;
@@ -17,10 +19,12 @@ import org.springframework.web.bind.annotation.*;
 public class PlaylistController {
     private final PlaylistService playlistService;
     private final PlaylistSongService playlistSongService;
+    private final UserService userService;
 
     public PlaylistController(PlaylistService playlistService, UserService userService, PlaylistSongService playlistSongService) {
         this.playlistService = playlistService;
         this.playlistSongService = playlistSongService;
+        this.userService = userService;
     }
 
     @GetMapping("/{playlistId}/info")
@@ -56,11 +60,12 @@ public class PlaylistController {
                                  @PathVariable Integer playlistId,
                                  @RequestBody PlaylistFormDTO playlistForm) {
         Integer requestUserId = JwtUtils.getUserIdFromToken(token);
+        UserInfo requester = userService.getUserInfoById(requestUserId);
         Playlist existingPlaylist = playlistService.getPlaylistById(playlistId);
         if (existingPlaylist == null) {
             return Result.error().message("歌单不存在！");
         }
-        if (!UserUtils.hasPlaylistPermission_by_userId(existingPlaylist, requestUserId)) {
+        if (!UserUtils.hasPlaylistPermission_by_userId(existingPlaylist, requester)) {
             return Result.error().message("无权限修改该歌单！");
         }
         existingPlaylist.setTitle(playlistForm.getTitle());
@@ -81,11 +86,12 @@ public class PlaylistController {
     @DeleteMapping("/{playlistId}")
     public Result removePlaylist(@RequestHeader("token") String token, @PathVariable Integer playlistId){
         Integer requestUserId = JwtUtils.getUserIdFromToken(token);
+        UserInfo requester = userService.getUserInfoById(requestUserId);
         Playlist existingPlaylist = playlistService.getPlaylistById(playlistId);
         if (existingPlaylist == null) {
             return Result.error().message("歌单不存在！");
         }
-        if (!UserUtils.hasPlaylistPermission_by_userId(existingPlaylist, requestUserId)) {
+        if (!UserUtils.hasPlaylistPermission_by_userId(existingPlaylist, requester)) {
             return Result.error().message("无权限删除该歌单！");
         }
         boolean success = playlistService.removePlaylist(playlistId)>-1;
@@ -96,4 +102,23 @@ public class PlaylistController {
         }
     }
 
+    //去掉播放列表某个歌曲，但是不会删除歌曲内容
+    @DeleteMapping("/{playlistId}/song/{songId}")
+    public Result removeSongInPlaylist(@RequestHeader("token") String token, @PathVariable Integer playlistId, @PathVariable Integer songId){
+        Integer requestUserId = JwtUtils.getUserIdFromToken(token);
+        UserInfo requester = userService.getUserInfoById(requestUserId);
+        Playlist existingPlaylist = playlistService.getPlaylistById(playlistId);
+        if (existingPlaylist == null) {
+            return Result.error().message("歌单不存在！");
+        }
+        if (!UserUtils.hasPlaylistPermission_by_userId(existingPlaylist, requester)) {
+            return Result.error().message("无权限删除该歌单！");
+        }
+        int targetIndex = playlistSongService.removePlaylistSong(playlistId, songId);
+        if(targetIndex>=0){
+            return Result.ok().oData(true).message("去除记录成功！");
+        }else {
+            return Result.error().oData(false).message("去除记录失败！");
+        }
+    }
 }

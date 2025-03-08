@@ -92,8 +92,7 @@ public class RoomSongService {
         for (RoomSong rs : roomSongList) {
             Integer songId = rs.getSongId();
             Song song = songService.getSongById(songId);
-            SongInfo songInfo = songInfoService.getSongInfoById(songId);
-            SongContent songContent = new SongContent(songInfo, getImgStrToBase64(song.getFileCoverPath()), getAudioFileNameByPath(song.getFilePath()));
+            SongContent songContent = songService.getSongContentBySong(song);
             songContentList.add(songContent);
         }
         return songContentList;
@@ -104,8 +103,7 @@ public class RoomSongService {
         for (PlaylistSong pls : plSongList) {
             Integer songId = pls.getSongId();
             Song song = songService.getSongById(songId);
-            SongInfo songInfo = songInfoService.getSongInfoById(songId);
-            SongContent songContent = new SongContent(songInfo, getImgStrToBase64(song.getFileCoverPath()), getAudioFileNameByPath(song.getFilePath()));
+            SongContent songContent = songService.getSongContentBySong(song);
             songContentList.add(songContent);
         }
         return songContentList;

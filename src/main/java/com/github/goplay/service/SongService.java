@@ -1,8 +1,10 @@
 package com.github.goplay.service;
 
+import com.github.goplay.dto.SongContent;
 import com.github.goplay.entity.Playlist;
 import com.github.goplay.entity.Room;
 import com.github.goplay.entity.Song;
+import com.github.goplay.entity.SongInfo;
 import com.github.goplay.mapper.PlaylistSongMapper;
 import com.github.goplay.mapper.SongMapper;
 import com.github.goplay.utils.FileUtils;
@@ -12,6 +14,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+
+import static com.github.goplay.utils.FileUtils.getAudioFileNameByPath;
+import static com.github.goplay.utils.FileUtils.getImgStrToBase64;
 
 @Service
 public class SongService {
@@ -29,31 +34,49 @@ public class SongService {
         this.songInfoService = songInfoService;
     }
 
+    //增
     @Transactional
-    public int addSong4Room(MultipartFile file, Room room, Integer userId, String path, String fileName) {
+    public SongContent addSong4Room(MultipartFile file, Room room, Integer userId, String path, String fileName) {
         Song song = insertSongByFileInfo(file,userId,path,fileName);
         if(song==null)
-            return -1;
+            return null;
 
         int cntRoomSong = roomSongService.addRoomSong(room.getId(), song.getId(), userId); //表room_song insert
         if (cntRoomSong <= 0)
-            return -1;
+            return null;
 
-        return 1;
+        return getSongContentBySong(song);
     }
 
     @Transactional
-    public int addSong4Playlist(MultipartFile file, Playlist playlist, Integer userId, String path, String fileName) {
+    public SongContent addSong4Playlist(MultipartFile file, Playlist playlist, Integer userId, String path, String fileName) {
         Song song = insertSongByFileInfo(file,userId,path,fileName);
         if(song==null)
-            return -1;
+            return null;
 
         int cntPlaylistSong = playlistSongService.addPlaylistSong(playlist.getId(), song.getId(), userId); //表playlist_song insert
         if (cntPlaylistSong <= 0)
-            return -1;
-
-        return 1;
+            return null;
+        return getSongContentBySong(song);
     }
+
+    //查
+    public Song getSongById(Integer id) {
+        return songMapper.selectById(id);
+    }
+
+    public SongContent getSongContentBySong(Song song) {
+        SongInfo songInfo = songInfoService.getSongInfoById(song.getId());
+        return new SongContent(songInfo, getImgStrToBase64(song.getFileCoverPath()), getAudioFileNameByPath(song.getFilePath()));
+    }
+
+    //删
+    public int removeSongById(Integer id) {
+        Song song = songMapper.selectById(id);
+        song.setIsActive(0);
+        return songMapper.updateById(song);
+    }
+
 
     /// 返回song
     private Song insertSongByFileInfo(MultipartFile file,Integer userId, String path, String fileName){
@@ -72,9 +95,5 @@ public class SongService {
         if (cntSongInfo <= 0)
             return null;
         return song;
-    }
-
-    public Song getSongById(Integer id) {
-        return songMapper.selectById(id);
     }
 }

@@ -48,7 +48,7 @@ public class RoomService {
     }
 
     // 用户加入房间
-    @Transactional // 确保数据库操作的一致性
+    @Transactional
     public Room addUserToRoom(Integer userId, String roomCode) {
         //根据房间代码 查找目标房间
         Room targetRoom = this.getRoomByRoomCode(roomCode);
@@ -76,7 +76,7 @@ public class RoomService {
     }
 
     // 用户退出房间
-    @Transactional // 确保数据库操作的一致性
+    @Transactional
     public boolean deleteUserFromRoom(Integer userId, String roomCode) {
         //根据房间代码 查找目标房间
         Room targetRoom = this.getRoomByRoomCode(roomCode);

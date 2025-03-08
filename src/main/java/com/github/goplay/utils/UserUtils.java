@@ -16,9 +16,6 @@ public class UserUtils {
     public static boolean hasPlaylistPermission_by_userId(Playlist playlist, UserInfo user){
         return playlist.getUserId()==user.getId() || user.getLevel()>=UserLevel.MANAGER;
     }
-    public static boolean hasPlaylistPermission_by_userId(Playlist playlist, Integer userId){
-        return playlist.getUserId()==userId || userId>=UserLevel.MANAGER;
-    }
 
     public static boolean canCheckFullPlaylistInfo(Integer playlistOwnerId, Integer requesterId, UserService userService){
         Integer requesterLevel = userService.getUserInfoById(requesterId).getLevel();
