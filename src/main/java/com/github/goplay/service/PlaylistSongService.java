@@ -41,4 +41,11 @@ public class PlaylistSongService {
         else
             return -1;
     }
+
+    public boolean isExistPlaylistSong(Integer playlistId, Integer songId) {
+        LambdaQueryWrapper<PlaylistSong> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(PlaylistSong::getPlaylistId, playlistId)
+                .eq(PlaylistSong::getSongId, songId);
+        return playlistSongMapper.selectCount(wrapper)>0;
+    }
 }
