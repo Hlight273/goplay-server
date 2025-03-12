@@ -10,6 +10,8 @@ import com.github.goplay.entity.Song;
 import com.github.goplay.entity.SongInfo;
 import com.github.goplay.mapper.RoomSongMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,6 +55,7 @@ public class RoomSongService {
         return roomSongMapper.insert(roomSong);
     }
 
+    @Cacheable(value = "roomSongs", key = "#roomId")
     @Transactional
     public List<SongContent> getSongContentListInRoom(Integer roomId){
         List<RoomSong> target_RoomSongs = roomSongMapper.selectList(
@@ -66,6 +69,7 @@ public class RoomSongService {
         return convert_RoomSongList_to_SongContentList(target_RoomSongs);
     }
 
+    @CacheEvict(value = "roomSongs", key = "#roomId")
     @Transactional
     public boolean removeSongInRoom(Integer roomId, Integer songId) {
         RoomSong target_RoomSong = roomSongMapper.selectOne(
@@ -97,6 +101,7 @@ public class RoomSongService {
         }
         return songContentList;
     }
+
 
     public List<SongContent> convert_PlaylistSongList_to_SongContentList(List<PlaylistSong> plSongList) {
         List<SongContent> songContentList = new ArrayList<>();

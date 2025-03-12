@@ -7,6 +7,9 @@ import com.github.goplay.entity.Playlist;
 import com.github.goplay.entity.PlaylistSong;
 import com.github.goplay.mapper.PlaylistMapper;
 import com.github.goplay.mapper.PlaylistSongMapper;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -28,6 +31,7 @@ public class PlaylistService {
         this.playlistMapper = playlistMapper;
     }
 
+
     public PlaylistInfo getPublicPlaylistInfo_by_playlistId(Integer playlistId){
         Playlist playlist = getPublicPlaylist_by_playlistId(playlistId);
         List<SongContent> songContentList = getSongContentList_by_playlistId(playlistId);
@@ -40,7 +44,8 @@ public class PlaylistService {
         return new PlaylistInfo(playlist, songContentList);
     }
 
-    private List<SongContent> getSongContentList_by_playlistId(Integer playlistId){
+    @Cacheable(value = "playlistSong", key = "#playlistId")
+    public List<SongContent> getSongContentList_by_playlistId(Integer playlistId){
         List<PlaylistSong> playlistSongs = playlistSongMapper.selectList(
                 new QueryWrapper<PlaylistSong>()
                         .eq("playlist_id", playlistId)
@@ -52,6 +57,7 @@ public class PlaylistService {
        return roomSongService.convert_PlaylistSongList_to_SongContentList(playlistSongs);
     }
 
+    @Cacheable(value = "publicPlaylist", key = "#playlistId", unless = "#result == null")
     public Playlist getPublicPlaylist_by_playlistId(Integer playlistId){
         Playlist playlist = playlistMapper.selectOne(
                 new QueryWrapper<Playlist>()
@@ -105,12 +111,14 @@ public class PlaylistService {
         return playlistInfos;
     }
 
+    @CacheEvict(value = "publicPlaylist", key = "#playlistId")
     public int addPlaylist(Playlist playlist){
         if(playlistMapper.insert(playlist)>-1)
             return playlist.getId();
         return -1;
     }
 
+    @CacheEvict(value = "publicPlaylist", key = "#playlistId")
     public int updatePlaylist(Playlist playlist){
         if(playlistMapper.updateById(playlist)>-1)
             return playlist.getId();
@@ -122,6 +130,7 @@ public class PlaylistService {
         return playlist;
     }
 
+    @CacheEvict(value = "publicPlaylist", key = "#playlistId")
     public int removePlaylist(Integer playlistId) {
         Playlist playlist = playlistMapper.selectById(playlistId);
         playlist.setIsActive(0);

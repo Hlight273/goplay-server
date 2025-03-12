@@ -50,3 +50,8 @@ spring:
   web:
     resources:
       static-locations: classpath:/static,/upload/
+management:
+  endpoints:
+    web:
+      exposure:
+        include: caches,metrics

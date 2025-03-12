@@ -3,7 +3,9 @@ package com.github.goplay.dto;
 import com.github.goplay.entity.Song;
 import com.github.goplay.entity.SongInfo;
 
-public class SongContent {
+import java.io.Serializable;
+
+public class SongContent implements Serializable {
 
     private SongInfo songInfo;
     private String coverBase64;

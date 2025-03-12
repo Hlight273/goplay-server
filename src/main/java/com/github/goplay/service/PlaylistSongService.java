@@ -5,6 +5,9 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.github.goplay.dto.UserInfo;
 import com.github.goplay.entity.*;
 import com.github.goplay.mapper.PlaylistSongMapper;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -17,6 +20,8 @@ public class PlaylistSongService {
         this.userService = userService;
     }
 
+
+    @CacheEvict(value = "playlistSong", key = "#playlistId")
     public int addPlaylistSong(Integer playlistId, Integer songId, Integer userId) {
         UserInfo userInfo = userService.getUserInfoById(userId);
         if(userInfo==null)
@@ -25,6 +30,7 @@ public class PlaylistSongService {
         return playlistSongMapper.insert(playlistSong);
     }
 
+    @CacheEvict(value = "playlistSong", key = "#playlistId")
     ///给pls表记录is_active设为false，返回其id或-1
     public int removePlaylistSong(Integer playlistId, Integer songId) {
         LambdaQueryWrapper<PlaylistSong> wrapper = new LambdaQueryWrapper<>();
@@ -48,4 +54,6 @@ public class PlaylistSongService {
                 .eq(PlaylistSong::getSongId, songId);
         return playlistSongMapper.selectCount(wrapper)>0;
     }
+
+
 }
