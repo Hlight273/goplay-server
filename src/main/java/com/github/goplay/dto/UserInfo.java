@@ -1,6 +1,8 @@
 package com.github.goplay.dto;
 
-public class UserInfo {
+import java.io.Serializable;
+
+public class UserInfo implements Serializable {
     private Integer id;
     private String username;
     private String avatarUrl;

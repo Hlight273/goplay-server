@@ -11,6 +11,8 @@ import com.github.goplay.mapper.*;
 import com.github.goplay.utils.PrivilegeCode;
 import com.github.goplay.utils.UserUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -72,10 +74,11 @@ public class UserService {
         return userMapper.selectOne(queryWrapper);
     }
 
+    @Cacheable(value = "userInfo", key = "#id")
     public UserInfo getUserInfoById(int id) {
         User user = userMapper.selectById(id);
         if (user == null) return null;
-        return new UserInfo(user.getId(),user.getUsername(), UserUtils.getAvatar(),user.getLevel(), user.getNickname());
+        return new UserInfo(user.getId(),user.getUsername(), UserUtils.getAvatar(), user.getLevel(), user.getNickname());
     }
 
     public Integer getUserPrivilegeInRoom(Integer roomId, Integer userId) {
@@ -142,6 +145,7 @@ public class UserService {
         return userInfo;
     }
 
+    @CacheEvict(value = "userInfo", key = "#id")
     public boolean updateUserNickname(Integer userId, String nickname) {
         LambdaUpdateWrapper<User> wrapper = new LambdaUpdateWrapper<>();
         wrapper.eq(User::getId, userId);
