@@ -111,14 +111,14 @@ public class PlaylistService {
         return playlistInfos;
     }
 
-    @CacheEvict(value = "publicPlaylist", key = "#playlistId")
+    @CacheEvict(value = "publicPlaylist", key = "#playlist.id")
     public int addPlaylist(Playlist playlist){
         if(playlistMapper.insert(playlist)>-1)
             return playlist.getId();
         return -1;
     }
 
-    @CacheEvict(value = "publicPlaylist", key = "#playlistId")
+    @CacheEvict(value = "publicPlaylist", key = "#playlist.id")
     public int updatePlaylist(Playlist playlist){
         if(playlistMapper.updateById(playlist)>-1)
             return playlist.getId();
