@@ -15,6 +15,7 @@ public class User {
     private String password;
     private Integer level;
     private String nickname;
+    private Integer hPoints;
 
     public User(Integer id, String username, String password, Integer level) {
         this.id = id;
@@ -24,12 +25,13 @@ public class User {
         this.nickname = username;
     }
 
-    public User(Integer id, String username, String password, Integer level, String nickname) {
+    public User(Integer id, String username, String password, Integer level, String nickname, Integer hPoints) {
         this.id = id;
         this.username = username;
         this.password = password;
         this.level = level;
         this.nickname = nickname;
+        this.hPoints = hPoints;
     }
 
     public User(String username, String password) {

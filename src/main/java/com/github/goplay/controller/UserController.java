@@ -95,18 +95,7 @@ public class UserController {
         }
     }
 
-    @GetMapping("/{userId}/vipInfo")
-    public Result userVipInfo(@PathVariable Integer userId){
-        VipInfo vipInfo = userService.getVipInfoByUserId(userId);
-        if(vipInfo != null){
-            return Result.ok()
-                    .oData(vipInfo)
-                    .message("查询成功");
-        }else {
-            return Result.empty()
-                    .message("查询为空！");
-        }
-    }
+
 
     @PutMapping("/nickname")
     public Result updateNickname(@RequestHeader("token") String token, @RequestParam("newNickname") String newNickname){
@@ -131,13 +120,27 @@ public class UserController {
         }
     }
 
+    @GetMapping("/{userId}/vipInfo")
+    public Result userVipInfo(@PathVariable Integer userId){
+        VipInfo vipInfo = userService.getVipInfoByUserId(userId);
+        if(vipInfo != null){
+            return Result.ok()
+                    .oData(vipInfo)
+                    .message("查询成功");
+        }else {
+            return Result.empty()
+                    .message("查询为空！");
+        }
+    }
+
     @Transactional
-    @PostMapping("/{userId}/renew/vipInfo")
-    public Result renewVipInfo(@PathVariable Integer userId, int vipLevel, Timestamp startTime, int validDays){
-        //假设已经经过支付系统鉴权
-        boolean renewSuccess = userService.renewUserVipInfo(userId,vipLevel, startTime, validDays);
+    @PutMapping("/renew/vipInfo")
+    public Result renewVipInfo(@RequestHeader("token") String token, int vipLevel, Timestamp startTime, int validDays){
+        Integer requester = JwtUtils.getUserIdFromToken(token);
+        //这里是通过积分换vip，rmb换积分走另外逻辑
+        boolean renewSuccess = userService.renewUserVipInfo(requester,vipLevel, startTime, validDays);
         if(renewSuccess){
-            VipInfo targetVipInfo = userService.getVipInfoByUserId(userId);
+            VipInfo targetVipInfo = userService.getVipInfoByUserId(requester);
             if(targetVipInfo!=null){
                 return Result.ok()
                         .oData(targetVipInfo)
