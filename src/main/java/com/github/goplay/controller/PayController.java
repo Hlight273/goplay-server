@@ -3,21 +3,28 @@ package com.github.goplay.controller;
 import com.github.goplay.constant.Status;
 import com.github.goplay.entity.PaymentOrder;
 import com.github.goplay.service.PaymentOrderService;
+import com.github.goplay.service.UserService;
 import com.github.goplay.utils.JwtUtils;
 import com.github.goplay.utils.Result;
 import jakarta.validation.constraints.Min;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+
+import static com.github.goplay.utils.UserUtils.calculatePoints;
 
 @RestController
 @RequestMapping("/mock/pay")
 public class PayController {
 
     private final PaymentOrderService orderService;
+    private final UserService userService;
 
-    public PayController(PaymentOrderService paymentOrderService) {
+    public PayController(PaymentOrderService paymentOrderService, UserService userService) {
         this.orderService = paymentOrderService;
+        this.userService = userService;
     }
 
     // 创建充值订单
@@ -72,14 +79,20 @@ public class PayController {
 
 
 
-    // 接收模拟支付结果
+    // 接收模拟支付结果(第三方支付平台的回调)
     @PostMapping("/confirm/{prepayId}/{success}")
     public Result confirmPayment(
             @PathVariable String prepayId,
             @PathVariable boolean success) {
 
-        orderService.processMockPayment(prepayId, success);
-        return Result.ok().message("支付结果已接收");
+        PaymentOrder order =orderService.processMockPayment(prepayId, success);
+        if(order.getStatus()==Status.OrderStatus.PAID.getCode()){
+            int addedHPoints = calculatePoints(order.getAmount());
+            userService.updateUserHPoints(order.getUserId(), addedHPoints);
+            return Result.ok().oData(addedHPoints).message("支付结果已接收");
+        }else {
+            return Result.error().message("支付异常！请等待退款");
+        }
     }
 
 //    // 模拟支付确认页面 //这部分让前端自己做单独页面

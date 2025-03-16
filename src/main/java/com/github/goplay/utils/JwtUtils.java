@@ -45,7 +45,7 @@ public class JwtUtils {
                 .setSigningKey(TOKEN_SECRET)
                 .parseClaimsJws(token)
                 .getBody();
-
+        if(claims==null){return -1;}
         return claims.get("userId", Integer.class);
     }
 }

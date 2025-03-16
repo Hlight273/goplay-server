@@ -83,6 +83,14 @@ public class User {
         this.nickname = nickname;
     }
 
+    public Integer gethPoints() {
+        return hPoints;
+    }
+
+    public void sethPoints(Integer hPoints) {
+        this.hPoints = hPoints;
+    }
+
     @Override
     public String toString() {
         return "User{" +

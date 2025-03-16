@@ -6,6 +6,8 @@ import com.github.goplay.entity.User;
 import com.github.goplay.service.UserService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import java.math.BigDecimal;
+
 public class UserUtils {
     private static final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
@@ -36,5 +38,10 @@ public class UserUtils {
     // 校验密码
     public static boolean verifyPassword(String rawPassword, String encodedPassword) {
         return passwordEncoder.matches(rawPassword, encodedPassword);
+    }
+
+    ///一元=100积分 (先简化)
+    public static Integer calculatePoints(BigDecimal amount){
+        return (amount.intValue()*100);
     }
 }

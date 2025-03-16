@@ -10,8 +10,6 @@ import com.github.goplay.service.RoomService;
 import com.github.goplay.service.UserService;
 import com.github.goplay.utils.JwtUtils;
 import com.github.goplay.utils.Result;
-import com.github.goplay.utils.UserUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -82,9 +80,13 @@ public class UserController {
         }
     }
 
-    @GetMapping("/{userId}/info")
-    public Result userInfo(@PathVariable Integer userId){
+    @GetMapping("/{userId}/info")//如果请求者请求自己的info，那么还得额外带回积分信息
+    public Result userInfo(@RequestHeader("token") String token, @PathVariable Integer userId){
+        Integer requesterId = JwtUtils.getUserIdFromToken(token);
         UserInfo userinfo = userService.getUserInfoById(userId);
+        if(requesterId == userId){
+            userinfo.sethPoints(userService.getUserHPoints(userId));
+        }
         if(userinfo != null){
             return Result.ok()
                     .oData(userinfo)

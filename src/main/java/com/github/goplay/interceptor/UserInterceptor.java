@@ -36,9 +36,9 @@ public class UserInterceptor implements HandlerInterceptor {
             throw new TokenValidationException(token, "无token,请重新登陆");
         }
         try {
-            Claims claims = JwtUtils.getClaimsByToken(token);
-            UserInfo targetUser = userService.getUserInfoById(claims.get("userId", Integer.class));
-            if (claims == null || targetUser==null) {
+            Integer targetUserId = JwtUtils.getUserIdFromToken(token);
+            UserInfo targetUser = userService.getUserInfoById(targetUserId);
+            if (targetUser==null) {
                 throw new TokenValidationException(token, "用户不存在");
             }
             return true;

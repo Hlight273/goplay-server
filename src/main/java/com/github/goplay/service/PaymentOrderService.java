@@ -8,6 +8,7 @@ import com.github.goplay.entity.PaymentOrder;
 import com.github.goplay.exception.OrderNotFoundException;
 import com.github.goplay.mapper.PaymentOrderMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,7 +43,7 @@ public class PaymentOrderService {
         return order;
     }
 
-    public void processMockPayment(String prepayId, boolean success) {
+    public PaymentOrder processMockPayment(String prepayId, boolean success) {
         QueryWrapper<PaymentOrder> queryWrapper = Wrappers.query();
         queryWrapper.eq("prepay_id", prepayId);
         PaymentOrder order = paymentOrderMapper.selectOne(queryWrapper);
@@ -61,7 +62,7 @@ public class PaymentOrderService {
         paymentOrderMapper.updateById(order);
         // 触发模拟回调
         //sendMockNotify(order);
-
+        return order;
     }
 
     public PaymentOrder getValidOrder(Integer userId, String prepayId) {

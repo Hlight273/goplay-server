@@ -1,5 +1,6 @@
 package com.github.goplay.websocket;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Component;
@@ -8,6 +9,7 @@ import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
 import java.util.Map;
 
+@ConditionalOnProperty(name = "data.redis", havingValue = "true")
 @Component
 public class WebSocketEventListener {
 

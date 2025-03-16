@@ -145,7 +145,7 @@ public class UserService {
         return userInfo;
     }
 
-    @CacheEvict(value = "userInfo", key = "#id")
+    @CacheEvict(value = "userInfo", key = "#userId")
     public boolean updateUserNickname(Integer userId, String nickname) {
         LambdaUpdateWrapper<User> wrapper = new LambdaUpdateWrapper<>();
         wrapper.eq(User::getId, userId);
@@ -157,6 +157,23 @@ public class UserService {
         LambdaUpdateWrapper<User> wrapper = new LambdaUpdateWrapper<>();
         wrapper.eq(User::getId, userId);
         wrapper.set(User::getPassword, UserUtils.encryptPassword(rawPwd));
+        return userMapper.update(wrapper)>0;
+    }
+
+    @CacheEvict(value = "userInfo", key = "#userId")
+    public Integer getUserHPoints(Integer userId) {
+        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(User::getId, userId);
+        User user = userMapper.selectOne(queryWrapper);
+        Integer hPoints = user.gethPoints();
+        return hPoints;
+    }
+    @CacheEvict(value = "userInfo", key = "#userId")
+    public boolean updateUserHPoints(Integer userId, Integer hPoints) {
+        LambdaUpdateWrapper<User> wrapper = new LambdaUpdateWrapper<>();
+        wrapper.eq(User::getId, userId);
+        //wrapper.set(User::gethPoints, hPoints);
+        wrapper.setSql("h_points = h_points + " + hPoints);
         return userMapper.update(wrapper)>0;
     }
 

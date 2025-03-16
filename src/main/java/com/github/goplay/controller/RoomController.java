@@ -33,11 +33,11 @@ import java.util.Map;
 @RequestMapping("/room")
 public class RoomController {
 
-    private final WebSocketSessionRegistry sessionRegistry;
+    //private final WebSocketSessionRegistry sessionRegistry;
     private final ApplicationEventPublisher eventPublisher;
 
-    public RoomController(WebSocketSessionRegistry sessionRegistry, ApplicationEventPublisher eventPublisher) {
-        this.sessionRegistry = sessionRegistry;
+    public RoomController(/*WebSocketSessionRegistry sessionRegistry,*/ ApplicationEventPublisher eventPublisher) {
+        //this.sessionRegistry = sessionRegistry;
         this.eventPublisher = eventPublisher;
     }
 
@@ -215,7 +215,7 @@ public class RoomController {
                                  @DestinationVariable("userId") Integer userId,
                                  @Payload String message) {
         System.out.println("房间id"+roomId+",用户id"+userId+":"+message+",准备转发");
-        return new RoomMsg(userService.getUserInfoById(userId), CommonUtils.curTime(), sessionRegistry.getTargetSession(roomId, userId)+" "+message);
+        return new RoomMsg(userService.getUserInfoById(userId), CommonUtils.curTime(), /*sessionRegistry.getTargetSession(roomId, userId)+" "+*/message);
     }
 
 //    //转发管理员点歌状态并广播到该房间 (需要检查管理员权限)

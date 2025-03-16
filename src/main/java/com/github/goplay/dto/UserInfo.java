@@ -10,6 +10,7 @@ public class UserInfo implements Serializable {
     private Integer privilege;
     private Integer level;
     private String nickname;
+    private Integer hPoints;
 
     public UserInfo(Integer id, String username, String avatarUrl, Integer level, String nickname) {
         this.id = id;
@@ -85,5 +86,13 @@ public class UserInfo implements Serializable {
 
     public void setNickname(String nickname) {
         this.nickname = nickname;
+    }
+
+    public Integer gethPoints() {
+        return hPoints;
+    }
+
+    public void sethPoints(Integer hPoints) {
+        this.hPoints = hPoints;
     }
 }

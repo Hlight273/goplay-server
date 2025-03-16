@@ -1,16 +1,20 @@
 package com.github.goplay.websocket;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
+@ConditionalOnProperty(name = "data.redis", havingValue = "true")
 @Component
 public class WebSocketSessionRegistry {
 
     private static final String ROOM_SESSION_KEY_PREFIX = "room:sessions:"; // Redis 中房间会话的前缀
 
+
     private RedisTemplate<String, Object> redisTemplate; // RedisTemplate 用于操作 Redis 数据
+
 
     public WebSocketSessionRegistry(RedisTemplate<String, Object> redisTemplate) {
         this.redisTemplate = redisTemplate;

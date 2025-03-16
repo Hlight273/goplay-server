@@ -9,10 +9,10 @@ import org.springframework.web.socket.config.annotation.*;
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
-    private final WebSocketSessionRegistry webSocketSessionRegistry;
+    //private final WebSocketSessionRegistry webSocketSessionRegistry;
 
-    public WebSocketConfig(WebSocketSessionRegistry webSocketSessionRegistry) {
-        this.webSocketSessionRegistry = webSocketSessionRegistry;
+    public WebSocketConfig(/*WebSocketSessionRegistry webSocketSessionRegistry*/) {
+        //this.webSocketSessionRegistry = webSocketSessionRegistry;
     }
 
     @Override
