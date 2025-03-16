@@ -28,7 +28,7 @@ public class UserUtils {
         if (userInfo==null)
             return false;
         Integer requesterLevel = userInfo.getLevel();
-        return playlistOwnerId==playlistOwnerId || requesterLevel >= UserLevel.MANAGER;
+        return Objects.equals(requesterId, playlistOwnerId) || requesterLevel >= UserLevel.MANAGER;
     }
 
     // 加密密码

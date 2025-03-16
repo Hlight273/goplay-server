@@ -1,5 +1,7 @@
 package com.github.goplay.controller;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.github.goplay.dto.PlaylistInfo;
 import com.github.goplay.dto.UserInfo;
 import com.github.goplay.dto.newDTO.PlaylistFormDTO;
@@ -11,9 +13,13 @@ import com.github.goplay.service.SongService;
 import com.github.goplay.service.UserService;
 import com.github.goplay.utils.JwtUtils;
 import com.github.goplay.utils.Result;
+import com.github.goplay.utils.UserLevel;
 import com.github.goplay.utils.UserUtils;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/playlist")
@@ -126,6 +132,20 @@ public class PlaylistController {
         }else {
             return Result.error().oData(false).message("去除记录失败！");
         }
+    }
+
+    @GetMapping("/search")
+    public Result searchPlaylists(@RequestHeader("token") String token,
+                                  @RequestParam String keyword,
+                                  @RequestParam int page,
+                                  @RequestParam int size) {
+        Integer requestUserId = JwtUtils.getUserIdFromToken(token);
+        UserInfo requester = userService.getUserInfoById(requestUserId);
+        boolean canSearchPrivate = requester.getLevel()>= UserLevel.MANAGER;
+        Page<PlaylistInfo> resultPage = playlistService.searchPlaylists(keyword, page, size, canSearchPrivate, requestUserId);
+        return resultPage.getRecords().isEmpty()
+                ? Result.empty().message("未找到相关歌单！")
+                : Result.ok().oData(resultPage.getRecords()).message("搜索成功！").data("total", resultPage.getTotal());
     }
 
 

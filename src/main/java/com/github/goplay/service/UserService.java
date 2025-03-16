@@ -130,21 +130,6 @@ public class UserService {
         return false;
     }
 
-    public UserInfo getFullUserInfoByTwoId(Integer roomId, Integer userId){
-        RoomUser roomUser = roomUserMapper.selectOne(
-                new QueryWrapper<RoomUser>()
-                        .eq("room_id", roomId)
-                        .eq("user_id", userId)
-        );
-        UserInfo userInfo = this.getUserInfoById(userId);
-        if(roomUser == null || userInfo == null){
-            return null;
-        }
-        userInfo.setRoom_id(roomId);
-        userInfo.setPrivilege(roomUser.getPrivilege());
-        return userInfo;
-    }
-
     @CacheEvict(value = "userInfo", key = "#userId")
     public boolean updateUserNickname(Integer userId, String nickname) {
         LambdaUpdateWrapper<User> wrapper = new LambdaUpdateWrapper<>();
