@@ -4,6 +4,7 @@ import com.github.goplay.constant.Status;
 import com.github.goplay.entity.PaymentOrder;
 import com.github.goplay.service.PaymentOrderService;
 import com.github.goplay.service.UserService;
+import com.github.goplay.utils.CommonUtils;
 import com.github.goplay.utils.JwtUtils;
 import com.github.goplay.utils.Result;
 import jakarta.validation.constraints.Min;
@@ -86,9 +87,10 @@ public class PayController {
             @PathVariable boolean success) {
 
         PaymentOrder order =orderService.processMockPayment(prepayId, success);
-        if(order.getStatus()==Status.OrderStatus.PAID.getCode()){
+        if(order.getStatus()==Status.OrderStatus.PAID.getCode()){//支付成功，增加积分并增加用户vip累计信息
             int addedHPoints = calculatePoints(order.getAmount());
             userService.updateUserHPoints(order.getUserId(), addedHPoints);
+            userService.renewUserVipInfo(order.getUserId(), addedHPoints, CommonUtils.curTime(), -1);
             return Result.ok().oData(addedHPoints).message("支付结果已接收");
         }else {
             return Result.error().message("支付异常！请等待退款");

@@ -10,6 +10,7 @@ import com.github.goplay.service.RoomService;
 import com.github.goplay.service.UserService;
 import com.github.goplay.utils.JwtUtils;
 import com.github.goplay.utils.Result;
+import com.github.goplay.utils.UserUtils;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -126,12 +127,13 @@ public class UserController {
     public Result userVipInfo(@PathVariable Integer userId){
         VipInfo vipInfo = userService.getVipInfoByUserId(userId);
         if(vipInfo != null){
+            vipInfo.setLevel(UserUtils.PointsToLevel(vipInfo.getLevel()));//需要积分换算等级，而不是直接给用户看累计积分
             return Result.ok()
                     .oData(vipInfo)
-                    .message("查询成功");
+                    .message("vip查询成功");
         }else {
             return Result.empty()
-                    .message("查询为空！");
+                    .message("vip查询为空！");
         }
     }
 

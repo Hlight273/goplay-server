@@ -197,16 +197,20 @@ public class UserService {
         return new VipInfo(userId, userVip.getVipLevel(), userVip.getStartDate(), userVip.getEndDate(), getDaysDiff(userVip.getStartDate(), userVip.getEndDate()));
     }
     private boolean createUserVip(Integer userId, int vipLevel, Timestamp startTime, int validDays) {
-        UserVip userVip = new UserVip(userId, vipLevel, startTime, validDays);
-        return userVipMapper.insert(userVip) == 1;
+        if(validDays==-1)//-1代表无限期
+            validDays = 365*99;
+        UserVip userVip = new UserVip(userId, vipLevel, startTime, Timestamp.valueOf(LocalDateTime.now().plusDays(validDays)));
+        return userVipMapper.insert(userVip) >= 1;
     }
     private boolean updateUserVip(UserVip userVip, int vipLevel, Timestamp startTime, int validDays) {
+        if(validDays==-1)//-1代表无限期
+            validDays = 365*99;
         LambdaUpdateWrapper<UserVip> updateWrapper = new LambdaUpdateWrapper<>();
-        updateWrapper.set(UserVip::getVipLevel,vipLevel);
+        updateWrapper.setSql("vip_level = vip_level + " + vipLevel);
         updateWrapper.set(UserVip::getStartDate,startTime);
         updateWrapper.set(UserVip::getEndDate, LocalDateTime.now().plusDays(validDays));
         updateWrapper.eq(UserVip::getId,userVip.getId());
-        return userVipMapper.update(userVip,updateWrapper) == 1;
+        return userVipMapper.update(userVip,updateWrapper) >= 1;
     }
 
 

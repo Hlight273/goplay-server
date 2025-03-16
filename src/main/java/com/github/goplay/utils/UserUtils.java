@@ -45,4 +45,15 @@ public class UserUtils {
     public static Integer calculatePoints(BigDecimal amount){
         return (amount.intValue()*100);
     }
+
+    public static Integer PointsToLevel(Integer points){
+        if(points>=12800){
+            return 3;
+        }else if(points>=3000){
+            return 2;
+        }else if(points>=600){
+            return 1;
+        }
+        return 0;
+    }
 }
