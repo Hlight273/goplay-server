@@ -7,6 +7,7 @@ import com.github.goplay.service.UserService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.math.BigDecimal;
+import java.util.Objects;
 
 public class UserUtils {
     private static final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
@@ -16,10 +17,10 @@ public class UserUtils {
     }
 
     public static boolean hasPlaylistPermission_by_userId(Playlist playlist, User user){
-        return playlist.getUserId()==user.getId() || user.getLevel()>=UserLevel.MANAGER;
+        return Objects.equals(playlist.getUserId(), user.getId()) || user.getLevel()>=UserLevel.MANAGER;
     }
     public static boolean hasPlaylistPermission_by_userId(Playlist playlist, UserInfo user){
-        return playlist.getUserId()==user.getId() || user.getLevel()>=UserLevel.MANAGER;
+        return Objects.equals(playlist.getUserId(), user.getId()) || user.getLevel()>=UserLevel.MANAGER;
     }
 
     public static boolean canCheckFullPlaylistInfo(Integer playlistOwnerId, Integer requesterId, UserService userService){
