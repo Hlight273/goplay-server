@@ -9,6 +9,7 @@ import org.jaudiotagger.audio.exceptions.InvalidAudioFrameException;
 import org.jaudiotagger.audio.exceptions.ReadOnlyFileException;
 import org.jaudiotagger.tag.*;
 import org.jaudiotagger.tag.images.Artwork;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
@@ -16,9 +17,16 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Base64;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class FileUtils {
+
+    private static final ExecutorService executor = Executors.newFixedThreadPool(2);
+
     public static void saveFile(MultipartFile file, String path)  {
         File dir = new File(path);
         if(!dir.exists()){
@@ -33,19 +41,79 @@ public class FileUtils {
         }
     }
 
-    public static String saveFile(MultipartFile file, String path, String newFileName) {
-        File dir = new File(path);
-        if(!dir.exists()){
+    /**
+     * 保存上传的文件到服务器本地(同时存一份压缩版供在线播放)
+     * @param file 上传的文件
+     * @param saveDir 保存的目录
+     * @param newFileName 新的文件名
+     * @return 文件的本地存储路径
+     */
+    public static String saveFile(MultipartFile file, String saveDir, String newFileName) {
+        File dir = new File(saveDir);
+        if (!dir.exists()) {
             dir.mkdirs();
         }
-        File f = new File(path, newFileName);
+        File f = new File(saveDir, newFileName);
         try {
-            file.transferTo(f);
-        }
-        catch (IOException e) {
+            file.transferTo(f);//保存源文件
+            executor.submit(() -> createCompressedMp3(f, saveDir));// 异步生成压缩版本 MP3 文件
+        } catch (IOException e) {
             e.printStackTrace();
+            return null; // 失败时返回null
         }
         return f.getAbsolutePath();
+    }
+
+    /**
+     * 使用 FFmpeg 异步将音频文件转换成 HLS
+     * @param sourceFile 源音频文件
+     * @return 生成的 m3u8 文件访问 URL
+     */
+    public static void convertToHlsAsync(File sourceFile) {
+        executor.submit(() -> convertToHls(sourceFile));
+    }
+    private static void convertToHls(File sourceFile) {
+        String fileNameWithoutExt = sourceFile.getName().replaceFirst("\\..*", "");
+        String outputDir = sourceFile.getParent() + File.separator + "hls";
+        File hlsDir = new File(outputDir);
+        if (!hlsDir.exists()) {
+            hlsDir.mkdirs();
+        }
+
+        String hlsOutputPath = outputDir + File.separator + "index.m3u8";
+
+        List<String> command = Arrays.asList(
+                "ffmpeg", "-i", sourceFile.getAbsolutePath(),
+                "-codec:", "copy",
+                "-start_number", "0",
+                "-hls_time", "10",
+                "-hls_list_size", "0",
+                "-f", "hls",
+                hlsOutputPath
+        );
+
+        ProcessBuilder processBuilder = new ProcessBuilder(command);
+        processBuilder.redirectErrorStream(true); // 合并 stderr 到 stdout
+
+        try {
+            Process process = processBuilder.start();
+
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    //System.out.println("[FFmpeg]: " + line);
+                }
+            }
+
+            int exitCode = process.waitFor();
+            if (exitCode == 0) {
+                System.out.println("HLS 转换成功: " + hlsOutputPath);
+            } else {
+                System.err.println("HLS 转换失败，退出代码: " + exitCode);
+            }
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     private static void saveImageToAudioFile(byte[] imageData, String path, String newFileName) {
@@ -260,4 +328,70 @@ public class FileUtils {
     public static String getFileName(MultipartFile file){
         return file.getOriginalFilename().substring(0, file.getOriginalFilename().lastIndexOf("."));
     }
+
+    public static File tryGetAudioFile_from_URL(String audioDir, String songUrl, Boolean isZipped){
+        if(isZipped){//如果请求者要zip那么先尝试寻找zip，如果没有那么就给原版（兼容）
+            String postFix = songUrl.substring(songUrl.lastIndexOf("."));
+            String originName = songUrl.replaceFirst(postFix + "$", "");
+            File file = tryGetAudioFile_from_URL(audioDir, "mini_"+originName+".mp3");
+            if(file.exists())
+                return file;
+        }
+        return tryGetAudioFile_from_URL(audioDir, songUrl);
+    }
+    private static File tryGetAudioFile_from_URL(String audioDir, String songUrl){
+        String postFix = songUrl.substring(songUrl.lastIndexOf("."));
+        String originName = songUrl.replaceFirst(postFix + "$", "");
+        String targetPath = audioDir + File.separator + originName + File.separator + songUrl;
+        File file = new File(targetPath);
+        if (!file.exists()){//兼容，新版路径找不到尝试找旧版
+            file = new File(audioDir + File.separator + songUrl);
+        }
+        return file;
+    }
+
+    public static String tryGetFileHlsPath(String audioDir, String songUrl){
+        String filename = songUrl.substring(songUrl.lastIndexOf("."));//得到UUID名
+        String targetPath = audioDir + File.separator + filename + File.separator + songUrl;
+        return targetPath;
+    }
+
+    private static void createCompressedMp3(File originalFile, String saveDir) {
+        String fileName = originalFile.getName();
+        String compressedFileName = "mini_" + fileName.replaceAll("\\.[^.]+$", "") + ".mp3";  // 压缩文件名，移除原文件扩展名并加上 .mp3
+        File compressedFile = new File(saveDir, compressedFileName);
+
+        // 生成 FFmpeg 命令
+        List<String> command = Arrays.asList(
+                "ffmpeg", "-i", originalFile.getAbsolutePath(),
+                "-codec:a", "libmp3lame", "-b:a", "64k", // 设置比特率为64kbps
+                compressedFile.getAbsolutePath()
+        );
+
+        ProcessBuilder processBuilder = new ProcessBuilder(command);
+        processBuilder.redirectErrorStream(true); // 合并 stderr 到 stdout
+
+        try {
+            Process process = processBuilder.start();
+
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+
+                }
+            }
+
+            int exitCode = process.waitFor();
+            if (exitCode == 0) {
+                System.out.println("压缩文件已生成: " + compressedFile.getAbsolutePath());
+            } else {
+                System.err.println("压缩文件生成失败，退出代码: " + exitCode);
+            }
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+
 }

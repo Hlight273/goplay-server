@@ -18,10 +18,13 @@ import com.github.goplay.utils.UserUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.UUID;
 
@@ -65,10 +68,13 @@ public class FileUpController {
             if (originalFilename != null) {
                 postFix = originalFilename.substring(originalFilename.lastIndexOf("."));
             }
-            String fileName = UUID.randomUUID().toString() + postFix; //+ "_" + originalFilename;
-            String path = FileUtils.saveFile(file, audioDir, fileName);
+            String fileName = UUID.randomUUID().toString(); //+ "_" + originalFilename;
+            String fileNameWithPostFix = fileName + postFix;
+            String path = FileUtils.saveFile(file, new File(audioDir,fileName).getAbsolutePath(), fileNameWithPostFix);
+            File targetFile = new File(path);
+            //FileUtils.convertToHlsAsync(targetFile);
 
-            SongContent songContent = songService.addSong4Room(file,room,userId,path,fileName);
+            SongContent songContent = songService.addSong4Room(file,room,userId,path,fileNameWithPostFix);
             if(songContent!=null){
                 eventPublisher.publishEvent(new RoomUpdateEvent(this, room.getId(), EventType.ROOM_SONG_LIST));
                 return Result.ok()

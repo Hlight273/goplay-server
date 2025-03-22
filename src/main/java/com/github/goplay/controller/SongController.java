@@ -1,5 +1,6 @@
 package com.github.goplay.controller;
 
+import com.github.goplay.utils.FileUtils;
 import com.github.goplay.utils.Result;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.catalina.connector.ClientAbortException;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.*;
 import java.net.URLEncoder;
 import java.nio.file.Files;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/song")
@@ -20,10 +22,10 @@ public class SongController {
     @Value("${file.upload-dir.audio}")
     public String audioDir;
 
-    @GetMapping("/{songUrl}")
-    public void songFile(HttpServletResponse response, @PathVariable String songUrl) throws UnsupportedEncodingException { //参考 https://blog.csdn.net/m0_74824592/article/details/144869195
-        File file = new File(audioDir, songUrl);
-        if (!file.exists()) {
+    @GetMapping("/{songUrl}/{isZipped}")
+    public void songFile(HttpServletResponse response, @PathVariable String songUrl, @PathVariable Integer isZipped) throws UnsupportedEncodingException { //参考 https://blog.csdn.net/m0_74824592/article/details/144869195
+        File file = FileUtils.tryGetAudioFile_from_URL(audioDir, songUrl, isZipped.equals(1));
+        if (file==null || !file.exists()) {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
@@ -53,5 +55,4 @@ public class SongController {
 
 
     }
-
 }

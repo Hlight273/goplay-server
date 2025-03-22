@@ -9,6 +9,7 @@ import com.github.goplay.mapper.PlaylistSongMapper;
 import com.github.goplay.mapper.SongMapper;
 import com.github.goplay.utils.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -36,6 +37,7 @@ public class SongService {
 
     //增
     @Transactional
+    @CacheEvict(value = "roomSongs", key = "#room.id")
     public SongContent addSong4Room(MultipartFile file, Room room, Integer userId, String path, String fileName) {
         Song song = insertSongByFileInfo(file,userId,path,fileName);
         if(song==null)
