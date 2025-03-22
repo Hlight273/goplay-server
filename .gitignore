@@ -1,4 +1,5 @@
 HELP.md
+out/artifacts
 target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
@@ -60,4 +61,5 @@ src/main/resources/application.yml
 
 # 忽略 Gradle 缓存
 /.gradle/
+
 

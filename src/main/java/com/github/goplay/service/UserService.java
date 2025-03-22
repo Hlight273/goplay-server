@@ -78,7 +78,9 @@ public class UserService {
     public UserInfo getUserInfoById(int id) {
         User user = userMapper.selectById(id);
         if (user == null) return null;
-        return new UserInfo(user.getId(),user.getUsername(), UserUtils.getAvatar(), user.getLevel(), user.getNickname());
+        UserInfo userInfo = new UserInfo(user.getId(), user.getUsername(), UserUtils.getAvatar(), user.getLevel(), user.getNickname());
+        userInfo.setIsActive(user.getIsActive());
+        return userInfo;
     }
 
     public Integer getUserPrivilegeInRoom(Integer roomId, Integer userId) {
@@ -138,6 +140,7 @@ public class UserService {
         return userMapper.update(wrapper)>0;
     }
 
+    @CacheEvict(value = "userInfo", key = "#userId")
     public boolean updateUserPwd(Integer userId, String rawPwd) {
         LambdaUpdateWrapper<User> wrapper = new LambdaUpdateWrapper<>();
         wrapper.eq(User::getId, userId);

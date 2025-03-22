@@ -16,6 +16,7 @@ public class User {
     private Integer level;
     private String nickname;
     private Integer hPoints;
+    private Integer isActive;
 
     public User(Integer id, String username, String password, Integer level) {
         this.id = id;
@@ -89,6 +90,14 @@ public class User {
 
     public void sethPoints(Integer hPoints) {
         this.hPoints = hPoints;
+    }
+
+    public Integer getIsActive() {
+        return isActive;
+    }
+
+    public void setIsActive(Integer isActive) {
+        this.isActive = isActive;
     }
 
     @Override

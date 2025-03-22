@@ -11,6 +11,7 @@ public class UserInfo implements Serializable {
     private Integer level;
     private String nickname;
     private Integer hPoints;
+    private Integer isActive;
 
     public UserInfo(Integer id, String username, String avatarUrl, Integer level, String nickname) {
         this.id = id;
@@ -94,5 +95,13 @@ public class UserInfo implements Serializable {
 
     public void sethPoints(Integer hPoints) {
         this.hPoints = hPoints;
+    }
+
+    public Integer getIsActive() {
+        return isActive;
+    }
+
+    public void setIsActive(Integer isActive) {
+        this.isActive = isActive;
     }
 }

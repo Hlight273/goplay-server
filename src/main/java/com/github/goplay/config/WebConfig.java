@@ -1,5 +1,6 @@
 package com.github.goplay.config;
 
+import com.github.goplay.interceptor.AdminInterceptor;
 import com.github.goplay.interceptor.UserInterceptor;
 import com.github.goplay.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +34,7 @@ public class WebConfig implements WebMvcConfigurer {
                 .excludePathPatterns("/static/**")
                 .excludePathPatterns("/api/static/**")
                 .addPathPatterns("/**");
+        registry.addInterceptor(new AdminInterceptor(userService)).addPathPatterns("/admin/**");
     }
 
     @Override

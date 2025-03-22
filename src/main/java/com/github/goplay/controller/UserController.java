@@ -5,6 +5,7 @@ import com.github.goplay.dto.UserInfo;
 import com.github.goplay.dto.VipInfo;
 import com.github.goplay.entity.Room;
 import com.github.goplay.entity.User;
+import com.github.goplay.exception.UserBannedException;
 import com.github.goplay.service.PlaylistService;
 import com.github.goplay.service.RoomService;
 import com.github.goplay.service.UserService;
@@ -40,6 +41,8 @@ public class UserController {
         User targetUser = userService.getUserByLoginInfo(user);
         if (targetUser == null) {
             return Result.error().message("用户名或密码不正确");
+        }else if(targetUser.getIsActive().equals(0)){
+            throw new UserBannedException();
         }else{
             String token = JwtUtils.generateToken( targetUser.getId(), user.getUsername());
             return Result.ok()

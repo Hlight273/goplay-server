@@ -40,9 +40,20 @@ public class PlaylistService {
         return new PlaylistInfo(playlist, songContentList);
     }
 
+    /***
+    从playlistId,构建其playlistInfo
+     */
     public PlaylistInfo getPlaylistInfo_by_playlistId(Integer playlistId){
         Playlist playlist = getPlaylist_by_playlistId(playlistId);
         List<SongContent> songContentList = getSongContentList_by_playlistId(playlistId);
+        return new PlaylistInfo(playlist, songContentList);
+    }
+    /***
+     从playlistId,构建其playlistInfo(无论是不是active都查)
+     */
+    public PlaylistInfo getPlaylistInfo_by_playlistId_ActiveAndNotActive(Integer playlistId){
+        Playlist playlist = getPlaylist_by_playlistId(playlistId, true);
+        List<SongContent> songContentList = getSongContentList_by_playlistId(playlistId, true);
         return new PlaylistInfo(playlist, songContentList);
     }
 
@@ -57,6 +68,18 @@ public class PlaylistService {
             return Collections.emptyList();
 
        return roomSongService.convert_PlaylistSongList_to_SongContentList(playlistSongs);
+    }
+    @Cacheable(value = "playlistSong", key = "#playlistId")
+    public List<SongContent> getSongContentList_by_playlistId(Integer playlistId, Boolean shouldGetUnActive){
+        QueryWrapper<PlaylistSong> eq = new QueryWrapper<PlaylistSong>()
+                .eq("playlist_id", playlistId);
+        if(!shouldGetUnActive)
+            eq.eq("is_active", 1);
+        List<PlaylistSong> playlistSongs = playlistSongMapper.selectList( eq);
+        if (playlistSongs.isEmpty())
+            return Collections.emptyList();
+
+        return roomSongService.convert_PlaylistSongList_to_SongContentList(playlistSongs);
     }
 
     @Cacheable(value = "publicPlaylist", key = "#playlistId", unless = "#result == null")
@@ -76,6 +99,14 @@ public class PlaylistService {
                         .eq("id", playlistId)
                         .eq("is_active", 1)
         );
+        return playlist;
+    }
+    public Playlist getPlaylist_by_playlistId(Integer playlistId, Boolean shouldGetUnActive){
+        QueryWrapper<Playlist> eq = new QueryWrapper<Playlist>()
+                .eq("id", playlistId);
+        if(!shouldGetUnActive)
+            eq.eq("is_active", 1);
+        Playlist playlist = playlistMapper.selectOne(eq);
         return playlist;
     }
 

@@ -3,6 +3,7 @@ package com.github.goplay.interceptor;
 import com.github.goplay.dto.UserInfo;
 import com.github.goplay.entity.User;
 import com.github.goplay.exception.TokenValidationException;
+import com.github.goplay.exception.UserBannedException;
 import com.github.goplay.service.UserService;
 import com.github.goplay.utils.JwtUtils;
 import io.jsonwebtoken.Claims;
@@ -40,6 +41,9 @@ public class UserInterceptor implements HandlerInterceptor {
             UserInfo targetUser = userService.getUserInfoById(targetUserId);
             if (targetUser==null) {
                 throw new TokenValidationException(token, "用户不存在");
+            }
+            else if(targetUser.getIsActive().equals(0)){
+                throw new UserBannedException();
             }
             return true;
         } catch (TokenValidationException e) {
