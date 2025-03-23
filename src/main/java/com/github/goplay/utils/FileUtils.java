@@ -20,6 +20,7 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -62,6 +63,18 @@ public class FileUtils {
             return null; // 失败时返回null
         }
         return f.getAbsolutePath();
+    }
+
+    ///策略。在audioDir下生成随机名的文件夹，再在里面分别存该随机名的源文件和该随机名的mp3
+    public static String saveAudioFile(MultipartFile file, String audioDir){
+        String originalFilename = file.getOriginalFilename();
+        String postFix = null;
+        if (originalFilename != null) {
+            postFix = originalFilename.substring(originalFilename.lastIndexOf("."));
+        }
+        String fileName = UUID.randomUUID().toString(); //+ "_" + originalFilename;
+        String fileNameWithPostFix = fileName + postFix;
+        return saveFile(file, new File(audioDir,fileName).getAbsolutePath(), fileNameWithPostFix);
     }
 
     /**

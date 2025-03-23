@@ -29,7 +29,7 @@ public class WebConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         //用户拦截器，除了以下三个白名单，都应该被拦截
         registry.addInterceptor(new UserInterceptor(userService))
-                .excludePathPatterns("/user/login", "/user/register","ws")
+                .excludePathPatterns("/user/login", "/user/register","/ws")
                 .excludePathPatterns("/api/user/login", "/api/user/register","/api/ws")
                 .excludePathPatterns("/static/**")
                 .excludePathPatterns("/api/static/**")

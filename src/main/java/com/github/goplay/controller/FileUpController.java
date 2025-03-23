@@ -26,6 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.UUID;
 
 @RestController
@@ -63,23 +64,15 @@ public class FileUpController {
             if(room==null)
                 return Result.error().message("房间不存在！");
 
-            String originalFilename = file.getOriginalFilename();
-            String postFix = null;
-            if (originalFilename != null) {
-                postFix = originalFilename.substring(originalFilename.lastIndexOf("."));
-            }
-            String fileName = UUID.randomUUID().toString(); //+ "_" + originalFilename;
-            String fileNameWithPostFix = fileName + postFix;
-            String path = FileUtils.saveFile(file, new File(audioDir,fileName).getAbsolutePath(), fileNameWithPostFix);
-            File targetFile = new File(path);
-            //FileUtils.convertToHlsAsync(targetFile);
+            String path = FileUtils.saveAudioFile(file, audioDir);
+            String filename = Paths.get(path).getFileName().toString();
 
-            SongContent songContent = songService.addSong4Room(file,room,userId,path,fileNameWithPostFix);
+            SongContent songContent = songService.addSong4Room(file,room,userId,path,filename);
             if(songContent!=null){
                 eventPublisher.publishEvent(new RoomUpdateEvent(this, room.getId(), EventType.ROOM_SONG_LIST));
                 return Result.ok()
                         .oData(songContent)
-                        .message("音频"+originalFilename+"上传成功！");
+                        .message("音频上传成功！");
             }
             else
                 return Result.error()
@@ -100,19 +93,14 @@ public class FileUpController {
             if(!canUpload)
                 return Result.error().message("权限不足！");
 
-            String originalFilename = file.getOriginalFilename();
-            String postFix = null;
-            if (originalFilename != null) {
-                postFix = originalFilename.substring(originalFilename.lastIndexOf("."));
-            }
-            String fileName = UUID.randomUUID().toString() + postFix; //+ "_" + originalFilename;
-            String path = FileUtils.saveFile(file, audioDir, fileName);
+            String path = FileUtils.saveAudioFile(file, audioDir);
+            String filename = Paths.get(path).getFileName().toString();
 
-            SongContent songContent = songService.addSong4Playlist(file,playlist,userId,path,fileName);
+            SongContent songContent = songService.addSong4Playlist(file,playlist,userId,path,filename);
             if(songContent!=null){
                 return Result.ok()
                         .oData(songContent)
-                        .message("音频"+originalFilename+"上传成功！");
+                        .message("音频上传成功！");
             }
             else
                 return Result.error()
