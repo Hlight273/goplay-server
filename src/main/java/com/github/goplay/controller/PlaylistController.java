@@ -53,6 +53,8 @@ public class PlaylistController {
     @Transactional
     @PostMapping
     public Result addPlaylist(@RequestHeader("token") String token, @RequestBody PlaylistFormDTO playlistForm){
+        if(playlistForm.getTitle().isEmpty())
+            return Result.error().message("歌单标题不能为空！");
         Integer requestUserId = JwtUtils.getUserIdFromToken(token);
         int playlistIndex =  playlistService.addPlaylist(new Playlist(requestUserId, playlistForm.getTitle(), playlistForm.getDescription(), playlistForm.getCoverUrl(), playlistForm.getIsPublic()));
         Playlist targetPlaylist = playlistService.getPlaylistById(playlistIndex);
@@ -71,6 +73,8 @@ public class PlaylistController {
         Result preCheck = preCheckModifyPlaylist(token, playlistId);
         if(preCheck!=null)
             return preCheck;
+        if(playlistForm.getTitle().isEmpty())
+            return Result.error().message("歌单标题不能为空！");
         Playlist existingPlaylist = playlistService.getPlaylistById(playlistId);
         existingPlaylist.setTitle(playlistForm.getTitle());
         existingPlaylist.setDescription(playlistForm.getDescription());
