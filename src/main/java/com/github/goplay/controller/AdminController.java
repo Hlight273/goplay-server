@@ -154,8 +154,7 @@ public class AdminController {
      * 更新歌曲信息
      */
     @PutMapping("/song/{songId}/info")
-    public Result updateSong(@RequestHeader("token") String token,
-                             @PathVariable Integer songId,
+    public Result updateSong(@PathVariable Integer songId,
                              @RequestBody Song updatedSong) {
         if (!adminService.updateSong(songId, updatedSong)) {
             return Result.error().message("歌曲更新失败！");

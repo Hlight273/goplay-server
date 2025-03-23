@@ -8,6 +8,8 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import java.io.Serializable;
 import java.sql.Timestamp;
 
+import static com.github.goplay.utils.CommonUtils.formatCurTime;
+
 public class Playlist implements Serializable {
 
     @TableId(type = IdType.AUTO)
@@ -47,6 +49,14 @@ public class Playlist implements Serializable {
         this.description = description;
         this.coverUrl = coverUrl;
         this.isPublic = isPublic;
+    }
+
+    public static Playlist newPlaylistByRoom(Integer userId, String nickName){
+        String title = nickName+"的房间歌单";
+        String description = "于"+formatCurTime()+"创建的的房间歌单";
+        Playlist playlist = new Playlist(userId, title, description, "", 1);
+        playlist.isActive = 1;
+        return playlist;
     }
 
     public Playlist() {

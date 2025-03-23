@@ -54,7 +54,12 @@ public class UploadUtils {
             new MagicNumber(new byte[]{(byte) 0x49, (byte) 0x44, (byte) 0x33}, "mp3"), // ID3 for MP3
             new MagicNumber(new byte[]{(byte) 0x52, (byte) 0x49, (byte) 0x46, (byte) 0x46}, "wav"), // RIFF for WAV
             new MagicNumber(new byte[]{(byte) 0x66, (byte) 0x4C, (byte) 0x61, (byte) 0x43}, "flac"), // fLaC
-            new MagicNumber(new byte[]{(byte) 0x4F, (byte) 0x67, (byte) 0x67, (byte) 0x53}, "ogg")  // OggS
+            new MagicNumber(new byte[]{(byte) 0x4F, (byte) 0x67, (byte) 0x67, (byte) 0x53}, "ogg"), // OggS for OGG
+            new MagicNumber(new byte[]{(byte) 0x41, (byte) 0x44, (byte) 0x49, (byte) 0x46}, "aac"), // ADIF for AAC
+            new MagicNumber(new byte[]{(byte) 0x66, (byte) 0x74, (byte) 0x79, (byte) 0x70}, "mp4"), // ftyp for MP4
+            new MagicNumber(new byte[]{(byte) 0x23, (byte) 0x21, (byte) 0x41, (byte) 0x4D, (byte) 0x52}, "amr"), // #!AMR for AMR
+            new MagicNumber(new byte[]{(byte) 0x30, (byte) 0x26, (byte) 0xB2, (byte) 0x75, (byte) 0x8E, (byte) 0x66, (byte) 0xCF, (byte) 0x11}, "wma"), // ASF for WMA
+            new MagicNumber(new byte[]{(byte) 0x2E, (byte) 0x52, (byte) 0x4D, (byte) 0x46}, "ra") // RMF for RealAudio
     );
 
     // 图片文件的魔数标识
