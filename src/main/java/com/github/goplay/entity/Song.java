@@ -21,6 +21,7 @@ public class Song {
   private Integer addedBy;
   private java.sql.Timestamp addedAt;
   private Integer isActive;
+  private Integer playCount;
 
   public Song(Integer id, Integer isExternal, String fileName, String filePath, Integer fileDuration, Integer fileSize, String fileMimeType, String fileCoverPath, Integer addedBy, Timestamp addedAt, Integer isActive) {
     this.id = id;
@@ -34,6 +35,21 @@ public class Song {
     this.addedBy = addedBy;
     this.addedAt = addedAt;
     this.isActive = isActive;
+  }
+
+  public Song(Integer id, Integer isExternal, String fileName, String filePath, Integer fileDuration, Integer fileSize, String fileMimeType, String fileCoverPath, Integer addedBy, Timestamp addedAt, Integer isActive, Integer playCount) {
+    this.id = id;
+    this.isExternal = isExternal;
+    this.fileName = fileName;
+    this.filePath = filePath;
+    this.fileDuration = fileDuration;
+    this.fileSize = fileSize;
+    this.fileMimeType = fileMimeType;
+    this.fileCoverPath = fileCoverPath;
+    this.addedBy = addedBy;
+    this.addedAt = addedAt;
+    this.isActive = isActive;
+    this.playCount = playCount;
   }
 
   public Song(Integer id, String fileName, String filePath, Integer fileDuration, Integer fileSize, String fileMimeType, String fileCoverPath, Integer addedBy) {
@@ -144,5 +160,13 @@ public class Song {
 
   private void setIsExternal(String filePath){
     this.isExternal = filePath.startsWith("http") ? 1 : 0;
+  }
+
+  public Integer getPlayCount() {
+    return playCount;
+  }
+
+  public void setPlayCount(Integer playCount) {
+    this.playCount = playCount;
   }
 }

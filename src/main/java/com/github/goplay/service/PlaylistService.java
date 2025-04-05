@@ -199,7 +199,7 @@ public class PlaylistService {
         resultPage.setRecords(playlistInfoList);
         return resultPage;
     }
-    private List<PlaylistInfo> convertToPlaylistInfo(List<Playlist> playlists) {
+    public List<PlaylistInfo> convertToPlaylistInfo(List<Playlist> playlists) {
         if (playlists.isEmpty()) {
             return List.of();
         }

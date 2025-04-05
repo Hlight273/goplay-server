@@ -12,6 +12,8 @@ public class SongDetailDTO {
         this.songInfo = songInfo;
     }
 
+
+
     public Song getSong() {
         return song;
     }
