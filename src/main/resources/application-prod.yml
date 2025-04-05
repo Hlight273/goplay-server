@@ -1,0 +1,10 @@
+file:
+  upload-dir:
+    audio: /home/username/upload/audio
+    image:
+      playlist-cover: /home/username/upload/image/playlist-cover/
+      user-avatar: /home/username/upload/image/user-avatar/
+mybatis-plus:
+  configuration:
+    call-setters-on-nulls: true
+    log-impl: org.apache.ibatis.logging.nologging.NoLoggingImpl

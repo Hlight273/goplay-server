@@ -1,10 +1,8 @@
 package com.github.goplay.service;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.github.goplay.dto.SongContent;
-import com.github.goplay.entity.Playlist;
-import com.github.goplay.entity.Room;
-import com.github.goplay.entity.Song;
-import com.github.goplay.entity.SongInfo;
+import com.github.goplay.entity.*;
 import com.github.goplay.mapper.PlaylistSongMapper;
 import com.github.goplay.mapper.SongMapper;
 import com.github.goplay.utils.FileUtils;
@@ -69,6 +67,8 @@ public class SongService {
 
     public SongContent getSongContentBySong(Song song) {
         SongInfo songInfo = songInfoService.getSongInfoById(song.getId());
+        if(songInfo==null)
+            return null;
         return new SongContent(songInfo, getImgStrToBase64(song.getFileCoverPath()), getAudioFileNameByPath(song.getFilePath()));
     }
 

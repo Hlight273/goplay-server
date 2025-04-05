@@ -143,6 +143,15 @@ public class AdminService {
         return userMapper.updateById(user) > 0;
     }
 
+    // 用户权限更改
+    @CacheEvict(value = "userInfo", key = "#userId")
+    public boolean updateUserLevel(Integer userId, Integer level) {
+        User user = userMapper.selectById(userId);
+        if (user == null) return false;
+        user.setLevel(level);
+        return userMapper.updateById(user) > 0;
+    }
+
     // 更新歌单信息
     public boolean updatePlaylist(Integer playlistId, Playlist updatedPlaylist) {
         updatedPlaylist.setId(playlistId);

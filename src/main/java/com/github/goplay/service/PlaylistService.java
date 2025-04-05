@@ -37,7 +37,7 @@ public class PlaylistService {
     public PlaylistInfo getPublicPlaylistInfo_by_playlistId(Integer playlistId){
         Playlist playlist = getPublicPlaylist_by_playlistId(playlistId);
         List<SongContent> songContentList = getSongContentList_by_playlistId(playlistId);
-        return new PlaylistInfo(playlist, songContentList);
+        return BuildPlayListInfo(playlist, songContentList);
     }
 
     /***
@@ -46,7 +46,7 @@ public class PlaylistService {
     public PlaylistInfo getPlaylistInfo_by_playlistId(Integer playlistId){
         Playlist playlist = getPlaylist_by_playlistId(playlistId);
         List<SongContent> songContentList = getSongContentList_by_playlistId(playlistId);
-        return new PlaylistInfo(playlist, songContentList);
+        return BuildPlayListInfo(playlist, songContentList);
     }
     /***
      从playlistId,构建其playlistInfo(无论是不是active都查)
@@ -54,6 +54,12 @@ public class PlaylistService {
     public PlaylistInfo getPlaylistInfo_by_playlistId_ActiveAndNotActive(Integer playlistId){
         Playlist playlist = getPlaylist_by_playlistId(playlistId, true);
         List<SongContent> songContentList = getSongContentList_by_playlistId(playlistId, true);
+        return BuildPlayListInfo(playlist, songContentList);
+    }
+
+    private PlaylistInfo BuildPlayListInfo(Playlist playlist, List<SongContent> songContentList){
+        if (playlist == null)
+            return null;
         return new PlaylistInfo(playlist, songContentList);
     }
 

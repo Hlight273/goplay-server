@@ -15,6 +15,7 @@ import com.github.goplay.utils.UserLevel;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 在AdminInterceptor中会拦截非管理员请求
@@ -113,7 +114,7 @@ public class AdminController {
     }
 
     /**
-     * 下架歌曲
+     * 用户状态
      */
     @PostMapping("/user/{userId}/deactivate")
     public Result deactivateUser(@PathVariable Integer userId) {
@@ -128,7 +129,7 @@ public class AdminController {
     }
 
     /**
-     * 上架歌曲
+     * 用户状态
      */
     @PostMapping("/user/{userId}/activate")
     public Result activateUser(@PathVariable Integer userId) {
@@ -136,6 +137,22 @@ public class AdminController {
             return Result.error().message("用户解禁失败！");
         }
         return Result.ok().message("用户解禁成功！");
+    }
+
+    /**
+     * 用户权限
+     */
+    @PutMapping("/user/{userId}/level")
+    public Result userLevel(@PathVariable Integer userId, @RequestBody Map<String, Integer> requestBody) {
+        Integer level = requestBody.get("level");
+        UserInfo userInfo = userService.getUserInfoById(userId);
+        if(userInfo.getLevel()>=UserLevel.ADMIN || level == UserLevel.ADMIN){
+            return Result.error().message("无权修改管理员事项！");
+        }
+        if (!adminService.updateUserLevel(userId, level)) {
+            return Result.error().message("用户权限更新失败！");
+        }
+        return Result.ok().message("用户权限更新成功！");
     }
 
     /**

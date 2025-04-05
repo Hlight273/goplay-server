@@ -96,8 +96,11 @@ public class RoomSongService {
         for (RoomSong rs : roomSongList) {
             Integer songId = rs.getSongId();
             Song song = songService.getSongById(songId);
+            if(song.getIsActive()==0)//下架歌曲直接跳过
+                continue;
             SongContent songContent = songService.getSongContentBySong(song);
-            songContentList.add(songContent);
+            if(songContent!=null)
+                songContentList.add(songContent);
         }
         return songContentList;
     }
@@ -108,8 +111,11 @@ public class RoomSongService {
         for (PlaylistSong pls : plSongList) {
             Integer songId = pls.getSongId();
             Song song = songService.getSongById(songId);
+            if(song.getIsActive()==0)//下架歌曲直接跳过
+                continue;
             SongContent songContent = songService.getSongContentBySong(song);
-            songContentList.add(songContent);
+            if(songContent!=null)
+                songContentList.add(songContent);
         }
         return songContentList;
     }

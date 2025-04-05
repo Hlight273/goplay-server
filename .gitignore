@@ -1,5 +1,4 @@
 HELP.md
-out/artifacts
 target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
@@ -52,9 +51,12 @@ build/
 # 忽略 Vim 的交换文件
 *.swp
 
-# 忽略敏感配置文件（注意：谨慎处理，不要将生产环境文件推送到仓库）
+# 忽略敏感文件
 src/main/resources/application.properties
 src/main/resources/application.yml
+compress/deploy.bat
+compress/runGoPlayOnServer.bat
+out/artifacts/goplay-server.jar
 
 # 忽略 Maven 本地仓库
 /.m2/

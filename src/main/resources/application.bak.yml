@@ -17,6 +17,8 @@ mybatis-plus:
 server:
   port: 8081
 spring:
+  profiles:
+    active: ${profile.active}
   application:
     name: goplay-server
   datasource:
