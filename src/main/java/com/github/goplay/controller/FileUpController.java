@@ -38,6 +38,8 @@ public class FileUpController {
     public String playlistCoverDir;
     @Value("${file.upload-dir.image.user-avatar}")
     public String userAvatarDir;
+    @Value("${file.upload-dir.image.post-img}")
+    public String postImgDir;
 
     private final ApplicationEventPublisher eventPublisher;
     private final RoomService roomService;
@@ -128,4 +130,26 @@ public class FileUpController {
             }
         }
     }
+
+    @PostMapping("/upload/post/image")
+    public Result uploadPostImage(@RequestParam("file") MultipartFile file) {
+        Result result = UploadUtils.getImageValidation(file);
+        if (result != null) {
+            return result;
+        } else {
+            String originalFilename = file.getOriginalFilename();
+            String postFix = null;
+            if (originalFilename != null) {
+                postFix = originalFilename.substring(originalFilename.lastIndexOf("."));
+            }
+            String fileName = UUID.randomUUID().toString() + postFix;
+            try {
+                String path = FileUtils.saveFile(file, postImgDir, fileName);
+                return Result.ok().oData(fileName).message("动态图片上传成功！");
+            } catch (Exception e) {
+                return Result.error().message("动态图片上传失败！");
+            }
+        }
+    }
+
 }

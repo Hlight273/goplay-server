@@ -18,6 +18,8 @@ public class WebConfig implements WebMvcConfigurer {
     public String playlistCoverDir;
     @Value("${file.upload-dir.image.user-avatar}")
     public String userAvatarDir;
+    @Value("${file.upload-dir.image.post-img}")
+    public String postImgDir;
 
     private final UserService userService;
     @Autowired
@@ -53,6 +55,8 @@ public class WebConfig implements WebMvcConfigurer {
                 .addResourceLocations("file:"+playlistCoverDir)  ;
         registry.addResourceHandler("/static/image/user-avatar/**")
                 .addResourceLocations("file:"+userAvatarDir)  ;
+        registry.addResourceHandler("/static/image/post-img/**")
+                .addResourceLocations("file:"+postImgDir)  ;
     }
 
 }

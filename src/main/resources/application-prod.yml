@@ -4,6 +4,7 @@ file:
     image:
       playlist-cover: /home/username/upload/image/playlist-cover/
       user-avatar: /home/username/upload/image/user-avatar/
+      post-img: /home/username/upload/image/post-img/
 mybatis-plus:
   configuration:
     call-setters-on-nulls: true
