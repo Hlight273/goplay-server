@@ -11,6 +11,7 @@ import org.jaudiotagger.tag.*;
 import org.jaudiotagger.tag.images.Artwork;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.multipart.MultipartFile;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -355,7 +356,8 @@ public class FileUtils {
     private static File tryGetAudioFile_from_URL(String audioDir, String songUrl){
         String postFix = songUrl.substring(songUrl.lastIndexOf("."));
         String originName = songUrl.replaceFirst(postFix + "$", "");
-        String targetPath = audioDir + File.separator + originName + File.separator + songUrl;
+        String folderName = StringUtils.removeStart(originName, "mini_");
+        String targetPath = audioDir + folderName + File.separator + songUrl;
         File file = new File(targetPath);
         if (!file.exists()){//兼容，新版路径找不到尝试找旧版
             file = new File(audioDir + File.separator + songUrl);
