@@ -7,6 +7,7 @@ public class UserInfo implements Serializable {
     private String username;
     private String avatarUrl;
     private Integer room_id;
+    private Integer isOnline;
     private Integer privilege;
     private Integer level;
     private String nickname;
@@ -28,6 +29,19 @@ public class UserInfo implements Serializable {
         this.room_id = room_id;
         this.privilege = privilege;
         this.nickname = nickname;
+    }
+
+    public UserInfo(Integer id, String username, String avatarUrl, Integer room_id, Integer isOnline, Integer privilege, Integer level, String nickname, Integer hPoints, Integer isActive) {
+        this.id = id;
+        this.username = username;
+        this.avatarUrl = avatarUrl;
+        this.room_id = room_id;
+        this.isOnline = isOnline;
+        this.privilege = privilege;
+        this.level = level;
+        this.nickname = nickname;
+        this.hPoints = hPoints;
+        this.isActive = isActive;
     }
 
     public UserInfo() {
@@ -103,5 +117,13 @@ public class UserInfo implements Serializable {
 
     public void setIsActive(Integer isActive) {
         this.isActive = isActive;
+    }
+
+    public Integer getIsOnline() {
+        return isOnline;
+    }
+
+    public void setIsOnline(Integer isOnline) {
+        this.isOnline = isOnline;
     }
 }

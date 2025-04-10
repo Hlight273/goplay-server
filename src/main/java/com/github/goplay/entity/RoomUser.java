@@ -16,6 +16,7 @@ public class RoomUser {
   private java.sql.Timestamp joinedAt;
   private Integer isActive;
   private Integer privilege;
+  private Integer isOnline;
 
   public RoomUser(Integer id, Integer roomId, Integer userId, Timestamp joinedAt, Integer isActive, Integer privilege) {
     this.id = id;
@@ -24,6 +25,16 @@ public class RoomUser {
     this.joinedAt = joinedAt;
     this.isActive = isActive;
     this.privilege = privilege;
+  }
+
+  public RoomUser(Integer id, Integer roomId, Integer userId, Timestamp joinedAt, Integer isActive, Integer privilege, Integer isOnline) {
+    this.id = id;
+    this.roomId = roomId;
+    this.userId = userId;
+    this.joinedAt = joinedAt;
+    this.isActive = isActive;
+    this.privilege = privilege;
+    this.isOnline = isOnline;
   }
 
   public RoomUser() {
@@ -88,5 +99,13 @@ public class RoomUser {
   }
   public void setPrivilegeMember(){
     setPrivilege(PrivilegeCode.MEMBER);
+  }
+
+  public Integer getIsOnline() {
+    return isOnline;
+  }
+
+  public void setIsOnline(Integer isOnline) {
+    this.isOnline = isOnline;
   }
 }
