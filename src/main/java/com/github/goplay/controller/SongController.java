@@ -24,7 +24,7 @@ public class SongController {
     public void songFile(HttpServletResponse response, @PathVariable String songUrl, @PathVariable Integer isZipped) throws UnsupportedEncodingException { //参考 https://blog.csdn.net/m0_74824592/article/details/144869195
         File file = FileUtils.tryGetAudioFile_from_URL(audioDir, songUrl, isZipped.equals(1));
         if (file==null || !file.exists()) {
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
             return;
         }
 
