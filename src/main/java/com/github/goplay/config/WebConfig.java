@@ -6,6 +6,7 @@ import com.github.goplay.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
@@ -14,6 +15,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
+    private final StringRedisTemplate stringRedisTemplate;
     @Value("${file.upload-dir.image.playlist-cover}")
     public String playlistCoverDir;
     @Value("${file.upload-dir.image.user-avatar}")
@@ -21,16 +23,19 @@ public class WebConfig implements WebMvcConfigurer {
     @Value("${file.upload-dir.image.post-img}")
     public String postImgDir;
 
+
     private final UserService userService;
+
     @Autowired
-    public WebConfig(UserService userService) {
+    public WebConfig(UserService userService, StringRedisTemplate stringRedisTemplate) {
         this.userService = userService;
+        this.stringRedisTemplate = stringRedisTemplate;
     }
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         //用户拦截器，除了以下三个白名单，都应该被拦截
-        registry.addInterceptor(new UserInterceptor(userService))
+        registry.addInterceptor(new UserInterceptor(userService, stringRedisTemplate))
                 .excludePathPatterns("/user/login", "/user/register","/ws")
                 .excludePathPatterns("/api/user/login", "/api/user/register","/api/ws")
                 .excludePathPatterns("/recommend/**")
