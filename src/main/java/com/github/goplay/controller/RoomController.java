@@ -1,5 +1,6 @@
 package com.github.goplay.controller;
 
+import com.github.goplay.cache.PlayerOperationCache;
 import com.github.goplay.dto.*;
 import com.github.goplay.entity.Playlist;
 import com.github.goplay.entity.Room;
@@ -15,10 +16,13 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @RestController
@@ -33,6 +37,8 @@ public class RoomController {
     private PlaylistSongService playlistSongService;
     @Autowired
     private PlaylistSongMapper playlistSongMapper;
+    @Autowired
+    private PlayerOperationCache playerOperationCache;
 
     public RoomController(/*WebSocketSessionRegistry sessionRegistry,*/ ApplicationEventPublisher eventPublisher) {
         //this.sessionRegistry = sessionRegistry;
@@ -248,12 +254,18 @@ public class RoomController {
         return new RoomMsg(userService.getUserInfoById(userId), CommonUtils.curTime(), /*sessionRegistry.getTargetSession(roomId, userId)+" "+*/message);
     }
 
+
+
     //转发管理员点歌状态并广播到该房间 (需要检查管理员权限)
     @MessageMapping("/{roomId}/{userId}/change/playerStatus")
     @SendTo("/topic/{roomId}/playerData")
     public PlayerData HandlePlayerStatusOld(@DestinationVariable("roomId") Integer roomId,
                                    @DestinationVariable("userId") Integer userId,
                                    @Payload PlayerData playerData) {
+        // 检查是否是1秒内的重复操作
+        if (!playerOperationCache.isOperationAllowed(roomId, userId, playerData)) {
+            return null;
+        }
         Integer privilege = roomUserService.get_RoomUserInfo_By2Id(roomId, userId).getPrivilege();
         if(privilege> PrivilegeCode.ADMIN)
             return null;

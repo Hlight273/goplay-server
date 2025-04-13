@@ -1,9 +1,10 @@
 package com.github.goplay.dto;
+import java.io.Serializable;
 import java.util.List;
 
 import com.github.goplay.entity.Playlist;
 
-public class PlaylistInfo {
+public class PlaylistInfo implements Serializable {
     private Playlist playlist;
     private List<SongContent> songContentList;
 

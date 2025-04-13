@@ -9,9 +9,11 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 @EnableCaching
 @SpringBootApplication/*(exclude = {RedisAutoConfiguration.class})*/
+@EnableScheduling
 @MapperScan("com.github.goplay.mapper")
 public class MyJwtApplication extends SpringBootServletInitializer {
 

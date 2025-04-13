@@ -3,7 +3,9 @@ package com.github.goplay.entity;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 
-public class RecommendPlaylist {
+import java.io.Serializable;
+
+public class RecommendPlaylist implements Serializable {
     @TableId(type = IdType.AUTO)
     private Integer id;
     private Integer playlistId;

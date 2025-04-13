@@ -1,20 +1,20 @@
 package com.github.goplay.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.github.goplay.dto.PlaylistInfo;
 import com.github.goplay.dto.SongContent;
-import com.github.goplay.dto.newDTO.SongDetailDTO;
 import com.github.goplay.entity.Playlist;
 import com.github.goplay.entity.RecommendPlaylist;
 import com.github.goplay.entity.Song;
 import com.github.goplay.mapper.PlaylistMapper;
 import com.github.goplay.mapper.RecommendMapper;
 import com.github.goplay.mapper.SongMapper;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -47,6 +47,7 @@ public class RecommendService {
         return recommendMapper.insert(recommendPlaylist)>-1;
     }
 
+    @CacheEvict(value = "recommendPlaylists_push", key = "#playlistId")
     public boolean removeRecommendPlaylist(Integer playlistId) {
         RecommendPlaylist recommendPlaylist = getRecommendPlaylist(playlistId);
         if(recommendPlaylist == null) {
@@ -64,7 +65,8 @@ public class RecommendService {
         return recommendPlaylist.getIsActive() == 1;
     }
 
-    private RecommendPlaylist getRecommendPlaylist(Integer playlistId) {
+    @Cacheable(value = "recommendPlaylists_push", key = "#playlistId")
+    public RecommendPlaylist getRecommendPlaylist(Integer playlistId) {
         LambdaQueryWrapper<RecommendPlaylist> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(RecommendPlaylist::getPlaylistId, playlistId)
                 .eq(RecommendPlaylist::getIsActive, 1);
@@ -74,33 +76,31 @@ public class RecommendService {
 
 
     // 获取推荐歌单（假设为最新的10个公开且激活的歌单）
+    //@Cacheable(value = "recommendPlaylists", key = "#limit")
     public List<PlaylistInfo> getSystemRecommendPlaylists(int limit) {
+        Page<Playlist> page = new Page<>(1, limit);
         LambdaQueryWrapper<Playlist> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Playlist::getIsActive, 1) // 确保是激活的
-                .eq(Playlist::getIsPublic, 1) // 确保是公开的
-                .orderByDesc(Playlist::getAddedAt) // 按添加时间降序排列
-                .last("LIMIT " + limit); // 限制结果数量
+        wrapper.eq(Playlist::getIsActive, 1)
+                .eq(Playlist::getIsPublic, 1)
+                .orderByDesc(Playlist::getAddedAt);
 
-        List<Playlist> playlists = playlistMapper.selectList(wrapper);
+        playlistMapper.selectPage(page, wrapper);
 
-        // 将 Playlist 转换为 PlaylistInfo
-        return playlistService.convertToPlaylistInfo(playlists);
+        return playlistService.convertToPlaylistInfo(page.getRecords());
     }
 
     // 获取热门歌曲（假设根据播放量，前10条）
+    //@Cacheable(value = "hotSongs", key = "#limit")
     public List<SongContent> getHotSongs(int limit) {
+        Page<Song> page = new Page<>(1, limit);
         LambdaQueryWrapper<Song> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Song::getIsActive, 1) // 确保是激活的歌曲
-                .orderByDesc(Song::getPlayCount) // 按播放量降序排列
-                .last("LIMIT " + limit); // 限制结果数量
+        wrapper.eq(Song::getIsActive, 1)
+                .orderByDesc(Song::getPlayCount);
 
-        List<Song> songs = songMapper.selectList(wrapper);
+        songMapper.selectPage(page, wrapper);
 
-        return songs.stream().map(song -> {
-            SongContent dto = songService.getSongContentBySong(song);
-            return dto;
-        }).toList();
+        return page.getRecords().stream()
+                .map(songService::getSongContentBySong)
+                .collect(Collectors.toList());
     }
-
-
 }
