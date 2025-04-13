@@ -12,6 +12,7 @@ public class UserInfo implements Serializable {
     private Integer level;
     private String nickname;
     private Integer hPoints;
+    private Integer mbtiType;
     private Integer isActive;
 
     public UserInfo(Integer id, String username, String avatarUrl, Integer level, String nickname) {
@@ -125,5 +126,13 @@ public class UserInfo implements Serializable {
 
     public void setIsOnline(Integer isOnline) {
         this.isOnline = isOnline;
+    }
+
+    public Integer getMbtiType() {
+        return mbtiType;
+    }
+
+    public void setMbtiType(Integer mbtiType) {
+        this.mbtiType = mbtiType;
     }
 }

@@ -8,14 +8,12 @@ import com.github.goplay.entity.User;
 import com.github.goplay.mapper.RoomMapper;
 import com.github.goplay.mapper.RoomUserMapper;
 import com.github.goplay.mapper.UserMapper;
-import com.github.goplay.utils.PrivilegeCode;
+import com.github.goplay.utils.Data.PrivilegeCode;
 import com.github.goplay.utils.RoomCodeUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
-import java.util.List;
 
 @Service
 public class RoomService {

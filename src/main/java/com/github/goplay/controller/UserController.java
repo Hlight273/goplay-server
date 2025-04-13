@@ -113,6 +113,16 @@ public class UserController {
         }
     }
 
+    @PutMapping("/mbti")
+    public Result updateMBTI(@RequestHeader("token") String token, @RequestParam("MBTIType") Integer MBTIType){
+        Integer requestUserId = JwtUtils.getUserIdFromToken(token);
+        if(userService.setUserMbtiType(requestUserId, MBTIType)){
+            return Result.ok().oData(true).message("MBTI提交成功！");
+        }else{
+            return Result.error().message("MBTI更新失败！");
+        }
+    }
+
     @PutMapping("/pwd")
     public Result updatePwd(@RequestHeader("token") String token, @RequestParam("oldPwd") String oldPwd, @RequestParam("newPwd") String newPwd){
         Integer requestUserId = JwtUtils.getUserIdFromToken(token);

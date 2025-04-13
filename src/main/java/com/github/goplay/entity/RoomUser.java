@@ -3,7 +3,7 @@ package com.github.goplay.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
-import com.github.goplay.utils.PrivilegeCode;
+import com.github.goplay.utils.Data.PrivilegeCode;
 
 import java.sql.Timestamp;
 

@@ -2,6 +2,7 @@ package com.github.goplay.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
+import lombok.Setter;
 
 //我们做orm的时候通常会让实体类名字和表名一致
 //有一个细节，表名和实体类名之间用默认大驼峰映射：
@@ -16,6 +17,7 @@ public class User {
     private Integer level;
     private String nickname;
     private Integer hPoints;
+    private Integer mbtiType;
     private Integer isActive;
 
     public User(Integer id, String username, String password, Integer level) {
@@ -100,6 +102,10 @@ public class User {
         this.isActive = isActive;
     }
 
+    public void setMbtiType(Integer mbtiType) {
+        this.mbtiType = mbtiType;
+    }
+
     @Override
     public String toString() {
         return "User{" +
@@ -107,5 +113,9 @@ public class User {
                 ", username='" + username + '\'' +
                 ", password='" + password + '\'' +
                 '}';
+    }
+
+    public Integer getMbtiType() {
+        return mbtiType;
     }
 }

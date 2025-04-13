@@ -1,4 +1,4 @@
-package com.github.goplay.utils;
+package com.github.goplay.utils.Data;
 
 public class UserLevel {
     public static Integer NORMAL = 0;

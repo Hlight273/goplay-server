@@ -4,6 +4,7 @@ import com.github.goplay.dto.UserInfo;
 import com.github.goplay.entity.Playlist;
 import com.github.goplay.entity.User;
 import com.github.goplay.service.UserService;
+import com.github.goplay.utils.Data.UserLevel;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.math.BigDecimal;
@@ -17,7 +18,7 @@ public class UserUtils {
     }
 
     public static boolean hasPlaylistPermission_by_userId(Playlist playlist, User user){
-        return Objects.equals(playlist.getUserId(), user.getId()) || user.getLevel()>=UserLevel.MANAGER;
+        return Objects.equals(playlist.getUserId(), user.getId()) || user.getLevel()>= UserLevel.MANAGER;
     }
     public static boolean hasPlaylistPermission_by_userId(Playlist playlist, UserInfo user){
         return Objects.equals(playlist.getUserId(), user.getId()) || user.getLevel()>=UserLevel.MANAGER;

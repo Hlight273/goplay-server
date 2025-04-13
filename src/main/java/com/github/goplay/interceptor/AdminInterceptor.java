@@ -4,7 +4,7 @@ import com.github.goplay.dto.UserInfo;
 import com.github.goplay.exception.AdminAuthorizationException;
 import com.github.goplay.service.UserService;
 import com.github.goplay.utils.JwtUtils;
-import com.github.goplay.utils.UserLevel;
+import com.github.goplay.utils.Data.UserLevel;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Component;

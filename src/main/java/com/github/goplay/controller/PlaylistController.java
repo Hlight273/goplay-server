@@ -1,25 +1,20 @@
 package com.github.goplay.controller;
 
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.github.goplay.dto.PlaylistInfo;
 import com.github.goplay.dto.UserInfo;
 import com.github.goplay.dto.newDTO.PlaylistFormDTO;
 import com.github.goplay.entity.Playlist;
-import com.github.goplay.entity.PlaylistSong;
 import com.github.goplay.service.PlaylistService;
 import com.github.goplay.service.PlaylistSongService;
 import com.github.goplay.service.SongService;
 import com.github.goplay.service.UserService;
 import com.github.goplay.utils.JwtUtils;
 import com.github.goplay.utils.Result;
-import com.github.goplay.utils.UserLevel;
+import com.github.goplay.utils.Data.UserLevel;
 import com.github.goplay.utils.UserUtils;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/playlist")

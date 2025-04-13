@@ -1,4 +1,4 @@
-package com.github.goplay.utils;
+package com.github.goplay.utils.Data;
 
 public class PrivilegeCode {
     public static Integer ROOM_OWNER = 1;

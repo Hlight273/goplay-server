@@ -3,14 +3,12 @@ package com.github.goplay.service;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.github.goplay.dto.PlaylistInfo;
 import com.github.goplay.dto.UserInfo;
 import com.github.goplay.dto.VipInfo;
 import com.github.goplay.entity.*;
 import com.github.goplay.mapper.*;
-import com.github.goplay.utils.PrivilegeCode;
+import com.github.goplay.utils.Data.PrivilegeCode;
 import com.github.goplay.utils.UserUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -18,9 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import static com.github.goplay.utils.CommonUtils.getDaysDiff;
 
@@ -79,8 +74,18 @@ public class UserService {
         User user = userMapper.selectById(id);
         if (user == null) return null;
         UserInfo userInfo = new UserInfo(user.getId(), user.getUsername(), UserUtils.getAvatar(), user.getLevel(), user.getNickname());
+        userInfo.setMbtiType(user.getMbtiType());
         userInfo.setIsActive(user.getIsActive());
         return userInfo;
+    }
+
+    @CacheEvict(value = "userInfo", key = "#userId")
+    public Boolean setUserMbtiType(int userId, Integer mbtiType) {
+        User user = new User();
+        user.setMbtiType(mbtiType);
+        return userMapper.update(user,
+                new LambdaQueryWrapper<User>()
+                        .eq(User::getId, userId)) > 0;
     }
 
     public Integer getUserPrivilegeInRoom(Integer roomId, Integer userId) {

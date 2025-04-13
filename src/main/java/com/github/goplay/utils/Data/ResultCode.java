@@ -1,4 +1,4 @@
-package com.github.goplay.utils;
+package com.github.goplay.utils.Data;
 
 public class ResultCode {
     public static Integer SUCCESS = 20000;

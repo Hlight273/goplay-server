@@ -3,7 +3,6 @@ package com.github.goplay.controller;
 import com.github.goplay.dto.PlaylistInfo;
 import com.github.goplay.dto.SongContent;
 import com.github.goplay.dto.UserInfo;
-import com.github.goplay.dto.newDTO.SongDetailDTO;
 import com.github.goplay.entity.Playlist;
 import com.github.goplay.service.PlaylistService;
 import com.github.goplay.service.RecommendService;
@@ -11,7 +10,7 @@ import com.github.goplay.service.SongService;
 import com.github.goplay.service.UserService;
 import com.github.goplay.utils.JwtUtils;
 import com.github.goplay.utils.Result;
-import com.github.goplay.utils.UserLevel;
+import com.github.goplay.utils.Data.UserLevel;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

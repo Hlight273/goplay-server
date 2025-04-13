@@ -9,6 +9,7 @@ import com.github.goplay.event.RoomUpdateEvent;
 import com.github.goplay.mapper.PlaylistSongMapper;
 import com.github.goplay.service.*;
 import com.github.goplay.utils.*;
+import com.github.goplay.utils.Data.PrivilegeCode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
@@ -16,13 +17,10 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @RestController

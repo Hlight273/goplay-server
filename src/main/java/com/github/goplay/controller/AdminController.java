@@ -6,15 +6,12 @@ import com.github.goplay.dto.UserInfo;
 import com.github.goplay.dto.newDTO.SongDetailDTO;
 import com.github.goplay.entity.Playlist;
 import com.github.goplay.entity.Song;
-import com.github.goplay.entity.User;
 import com.github.goplay.service.AdminService;
 import com.github.goplay.service.UserService;
-import com.github.goplay.utils.JwtUtils;
 import com.github.goplay.utils.Result;
-import com.github.goplay.utils.UserLevel;
+import com.github.goplay.utils.Data.UserLevel;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Map;
 
 /**
