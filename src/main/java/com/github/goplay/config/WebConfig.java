@@ -52,7 +52,8 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowCredentials(true)
                 .allowedOriginPatterns("*")
                 .allowedMethods("POST", "GET", "PUT", "OPTIONS", "DELETE")
-                .allowedHeaders("*");
+                .allowedHeaders("*")
+                .exposedHeaders("daily-points-added", "points-amount");
     }
 
     @Override

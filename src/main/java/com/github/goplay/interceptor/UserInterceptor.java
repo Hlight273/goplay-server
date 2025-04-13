@@ -66,7 +66,7 @@ public class UserInterceptor implements HandlerInterceptor {
                 throw new UserBannedException();
             }
 
-            processUserDailyHPoint(targetUserId);//用户每日积分检查
+            processUserDailyHPoint(targetUserId, response);//用户每日积分检查
 
             return true;
         } catch (TokenValidationException e) {
@@ -81,7 +81,7 @@ public class UserInterceptor implements HandlerInterceptor {
 
     private static final int DAILY_POINTS = 2; //每日奖励积分数2
 
-    private void processUserDailyHPoint(Integer userId) {
+    private void processUserDailyHPoint(Integer userId, HttpServletResponse response) {
         String key = "daily_points:" + userId;
 
         LocalDateTime now = LocalDateTime.now();
@@ -94,6 +94,8 @@ public class UserInterceptor implements HandlerInterceptor {
         if (success) {
             //log.info("为用户[{}]添加{}积分", userId, DAILY_POINTS);
             userService.updateUserHPoints(userId, DAILY_POINTS);
+            response.setHeader("Daily-Points-Added", "true"); //响应头自定义积分信息
+            response.setHeader("Points-Amount", String.valueOf(DAILY_POINTS));
             //log.info("用户[{}]积分添加完成", userId);
         } else {
             //log.info("用户[{}]今日已领取积分", userId);
