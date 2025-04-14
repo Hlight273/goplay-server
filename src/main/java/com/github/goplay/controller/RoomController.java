@@ -153,14 +153,15 @@ public class RoomController {
 
     @Transactional
     @DeleteMapping("/{roomCode}/user/{userId}")
-    public Result RoomExit(@PathVariable String roomCode, @PathVariable Integer userId){
-        boolean exitSuccessful = roomService.deleteUserFromRoom(userId,roomCode);
+    public Result RoomExit(@RequestHeader("token") String token, @PathVariable String roomCode, @PathVariable Integer userId){
+        Integer requesterId = JwtUtils.getUserIdFromToken(token);
+        boolean exitSuccessful = roomService.deleteUserFromRoom(requesterId, userId,roomCode);
         if(exitSuccessful){
             Room room = roomService.getRoomByRoomCode(roomCode);
             eventPublisher.publishEvent(new RoomUpdateEvent(this, room.getId(), EventType.ROOM_USER_LIST));
             return Result.ok().message("退出成功");
         }else {
-            return Result.error().message("退出失败");
+            return Result.error().message("操作失败");
         }
     }
 

@@ -4,6 +4,7 @@ import com.github.goplay.dto.UserInfo;
 import com.github.goplay.entity.Playlist;
 import com.github.goplay.entity.User;
 import com.github.goplay.service.UserService;
+import com.github.goplay.utils.Data.PrivilegeCode;
 import com.github.goplay.utils.Data.UserLevel;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
@@ -30,6 +31,16 @@ public class UserUtils {
             return false;
         Integer requesterLevel = userInfo.getLevel();
         return Objects.equals(requesterId, playlistOwnerId) || requesterLevel >= UserLevel.MANAGER;
+    }
+
+    public static boolean canKick(int requesterPrivilege, int targetPrivilege) {
+        if (requesterPrivilege == PrivilegeCode.ROOM_OWNER) {
+            return true; // 房主可以踢任何人
+        }
+        if (requesterPrivilege == PrivilegeCode.ADMIN && targetPrivilege == PrivilegeCode.MEMBER) {
+            return true; // 管理员只能踢普通成员
+        }
+        return false; // 其他情况都不行，比如普通成员踢人，管理员踢房主
     }
 
     // 加密密码

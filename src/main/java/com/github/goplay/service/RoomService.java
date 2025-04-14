@@ -1,6 +1,8 @@
 package com.github.goplay.service;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.github.goplay.entity.Room;
 import com.github.goplay.entity.RoomUser;
@@ -10,6 +12,7 @@ import com.github.goplay.mapper.RoomUserMapper;
 import com.github.goplay.mapper.UserMapper;
 import com.github.goplay.utils.Data.PrivilegeCode;
 import com.github.goplay.utils.RoomCodeUtils;
+import com.github.goplay.utils.UserUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -73,52 +76,67 @@ public class RoomService {
 
     }
 
-    // 用户退出房间
+    // 用户移除房间
     @Transactional
-    public boolean deleteUserFromRoom(Integer userId, String roomCode) {
-        //根据房间代码 查找目标房间
+    public boolean deleteUserFromRoom(Integer requesterId, Integer userId, String roomCode) {
         Room targetRoom = this.getRoomByRoomCode(roomCode);
-
-        if (targetRoom == null)
-            return false; // 房间不存在
+        if (targetRoom == null) return false;
 
         User targetUser = userMapper.selectById(userId);
-        if (targetUser == null)
-            return false; // 用户不存在
+        if (targetUser == null) return false;
 
-        //房间-用户表 update active为false
-        roomUserMapper.update(
-                new UpdateWrapper<RoomUser>()
-                        .eq("is_active", true)
-                        .eq("room_id", targetRoom.getId())
-                        .eq("user_id", userId)
-                        .set("is_active", false)
-        );
+        // 查询 requester 的 RoomUser 权限
+        RoomUser requesterRoomUser = roomUserMapper.selectOne(new LambdaQueryWrapper<RoomUser>()
+                .eq(RoomUser::getUserId, requesterId)
+                .eq(RoomUser::getRoomId, targetRoom.getId())
+                .eq(RoomUser::getIsActive, true));
 
-        //房间表 update 当前用户-1，如果当前用户为0 则房间关闭。 如果没关闭要移交权限
+        // 查询被操作对象的 RoomUser 权限
+        RoomUser targetRoomUser = roomUserMapper.selectOne(new LambdaQueryWrapper<RoomUser>()
+                .eq(RoomUser::getUserId, userId)
+                .eq(RoomUser::getRoomId, targetRoom.getId())
+                .eq(RoomUser::getIsActive, true));
+
+        if (targetRoomUser == null) return false;
+
+        // 如果不是自己退出，视为踢人
+        if (!requesterId.equals(userId)) {
+            if (requesterRoomUser == null) return false; // 请求者不在房间里
+            if(!UserUtils.canKick(requesterRoomUser.getPrivilege(), targetRoomUser.getPrivilege()))return false;//t人权限不足
+        }
+        //否则就是自己退出房间，需要考虑移交权限
+
+        // 更新 RoomUser 表（设置为 inactive）
+        roomUserMapper.update(null, new LambdaUpdateWrapper<RoomUser>()
+                .eq(RoomUser::getIsActive, true)
+                .eq(RoomUser::getRoomId, targetRoom.getId())
+                .eq(RoomUser::getUserId, userId)
+                .set(RoomUser::getIsActive, false));
+
+        // 更新房间用户数
         int curUser = targetRoom.getCurrentUsers() - 1;
         targetRoom.setCurrentUsers(curUser);
-        if (curUser==0)
-            targetRoom.setIsActive(0);
-        else {
-            //房主退出还有成员 则移交房主给先加入的权限高者
-            if(targetRoom.getOwnerId() == targetUser.getId()){
-                RoomUser targetRiseUpRoomUser = roomUserMapper.selectOne(//roomUser select
-                    new UpdateWrapper<RoomUser>()
-                        .eq("is_active", 1)
-                        .eq("room_id", targetRoom.getId())
-                        .orderByAsc("privilege")
-                        .last("limit 1")
-                );
-                if(targetRiseUpRoomUser!=null){
-                    targetRoom.setOwnerId(targetRiseUpRoomUser.getUserId());
-                    targetRiseUpRoomUser.setPrivilegeRoomOwner();
-                    roomUserMapper.updateById(targetRiseUpRoomUser);//roomUser update privilege
+
+        if (curUser == 0) {
+            targetRoom.setIsActive(0); // 房间关闭
+        } else {
+            // 如果房主离开，转移房主权限
+            if (targetRoom.getOwnerId().equals(userId)) {
+                RoomUser newOwner = roomUserMapper.selectOne(new LambdaQueryWrapper<RoomUser>()
+                        .eq(RoomUser::getIsActive, true)
+                        .eq(RoomUser::getRoomId, targetRoom.getId())
+                        .orderByAsc(RoomUser::getPrivilege)
+                        .last("limit 1"));
+
+                if (newOwner != null) {
+                    targetRoom.setOwnerId(newOwner.getUserId());
+                    newOwner.setPrivilege(PrivilegeCode.ROOM_OWNER);
+                    roomUserMapper.updateById(newOwner);
                 }
             }
         }
-        roomMapper.updateById(targetRoom);//最后房间表 update
 
+        roomMapper.updateById(targetRoom);
         return true;
     }
 
