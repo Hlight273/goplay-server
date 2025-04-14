@@ -5,17 +5,23 @@ import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.data.redis.cache.RedisCacheConfiguration;
+import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
-@ConditionalOnProperty(name = "redis.enabled", havingValue = "true")
+import java.time.Duration;
+import java.time.LocalTime;
+
 @Configuration
+//@ConditionalOnProperty(name = "spring.redis.enabled", havingValue = "true")
 public class RedisConfig {
 
     @Bean(name = "redisTemplate")
@@ -46,6 +52,17 @@ public class RedisConfig {
         //必须设置，否则无法将JSON转化为对象，会转化成Map类型
         objectMapper.activateDefaultTyping(LaissezFaireSubTypeValidator.instance, ObjectMapper.DefaultTyping.NON_FINAL);
         return new GenericJackson2JsonRedisSerializer(objectMapper);
+    }
+
+
+    @Bean(name="midnightCacheManager")
+    public RedisCacheManager midnightCacheManager(RedisConnectionFactory connectionFactory) {//每日零点清除的redisManager
+        long secondsUntilMidnight = LocalTime.now().until(LocalTime.MAX, java.time.temporal.ChronoUnit.SECONDS) + 1;
+
+        return RedisCacheManager.builder(connectionFactory)
+                .cacheDefaults(RedisCacheConfiguration.defaultCacheConfig()
+                        .entryTtl(Duration.ofSeconds(secondsUntilMidnight)))
+                .build();
     }
 
 

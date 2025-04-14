@@ -11,6 +11,7 @@ import com.github.goplay.utils.Data.PrivilegeCode;
 import com.github.goplay.utils.UserUtils;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -74,12 +75,16 @@ public class UserService {
         User user = userMapper.selectById(id);
         if (user == null) return null;
         UserInfo userInfo = new UserInfo(user.getId(), user.getUsername(), UserUtils.getAvatar(), user.getLevel(), user.getNickname());
-        userInfo.setMbtiType(user.getMbtiType());
+        if(user.getMbtiType()!=null)
+            userInfo.setMbtiType(user.getMbtiType());
         userInfo.setIsActive(user.getIsActive());
         return userInfo;
     }
 
-    @CacheEvict(value = "userInfo", key = "#userId")
+
+    @Caching(evict = {
+            @CacheEvict(value = "userInfo", key = "#userId"),
+            @CacheEvict(value = "similarMbtiUsers", key = "#userId",cacheManager = "midnightCacheManager")})
     public Boolean setUserMbtiType(int userId, Integer mbtiType) {
         User user = new User();
         user.setMbtiType(mbtiType);
