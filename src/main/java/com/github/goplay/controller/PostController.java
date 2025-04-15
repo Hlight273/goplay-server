@@ -36,6 +36,13 @@ public class PostController {
         return Result.ok().data("posts", postPage.getRecords()).data("total", postPage.getTotal());
     }
 
+    /** 获取某用户的动态（分页） */
+    @GetMapping("{userId}")
+    public Result getPostListByUserId(@PathVariable Integer userId, @RequestParam Integer page, @RequestParam Integer pageSize) {
+        IPage<PostVO> postPage = postService.getPostsByUserId(userId, page, pageSize);
+        return Result.ok().data("posts", postPage.getRecords()).data("total", postPage.getTotal());
+    }
+
     /** 获取某个动态的评论（分页） */
     @GetMapping("/comment/{postId}")
     public Result getPostComments(
@@ -70,8 +77,8 @@ public class PostController {
     @PostMapping("/like/{postId}")
     public Result toggleLike(@RequestHeader("token") String token, @PathVariable Integer postId) {
         Integer userId = JwtUtils.getUserIdFromToken(token);
-        boolean liked = postService.toggleLike(postId, userId);
-        return Result.ok().message(liked ? "点赞成功！" : "取消点赞！");
+        boolean success = postService.toggleLike(postId, userId);
+        return Result.ok().message(success ? "操作成功！" : "操作失败！");
     }
 }
 

@@ -14,6 +14,7 @@ import com.github.goplay.utils.UserUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -69,52 +70,22 @@ public class PostService {
                         .eq(Post::getIsActive, 1)
                         .orderByDesc(Post::getCreateTime));
 
-        List<PostVO> postVOList = pageResult.getRecords().stream().map(post -> {
-            PostVO vo = new PostVO();
-            vo.setId(post.getId());
-            vo.setAddedBy(post.getUserId());
-            vo.setContentText(post.getContent());
-            if(post.getSongId()!=null){
-                Song song = songService.getSongById(post.getSongId());
-                if (song == null) return null;
-                SongContent songContent = songService.getSongContentBySong(song);
-                if (song != null && songContent == null) return null;
-                vo.setSongContent(songContent);
-            }
-            vo.setLinkUrl(post.getLinkUrl());
-            vo.setAddedAt(post.getCreateTime());
-
-            // 查询图片
-            vo.setImageUrls(postImageMapper.selectList(
-                            new LambdaQueryWrapper<PostImage>()
-                                    .eq(PostImage::getPostId, post.getId())
-                                    .eq(PostImage::getIsActive, 1))
-                    .stream().map(PostImage::getImageUrl).collect(Collectors.toList()));
-
-            // 查询评论数和点赞数
-            vo.setLikeCount(Math.toIntExact(postLikeMapper.selectCount(
-                    new LambdaQueryWrapper<PostLike>().eq(PostLike::getPostId, post.getId()))));
-            vo.setCommentCount(Math.toIntExact(postCommentMapper.selectCount(
-                    new LambdaQueryWrapper<PostComment>().eq(PostComment::getPostId, post.getId()))));
-
-            // 默认不展示当前用户是否点赞，由前端调用另外接口或带 userId 进来判断
-            vo.setLikedByCurrentUser(false);
-
-            // 查询用户昵称和头像
-            User user = userMapper.selectById(post.getUserId());
-            if (user != null) {
-                vo.setAddedByName(user.getNickname());
-                vo.setAddedByAvatar(UserUtils.getAvatar());
-            }
-
-            return vo;
-        }).collect(Collectors.toList());
-
-        Page<PostVO> voPage = new Page<>(page, pageSize, pageResult.getTotal());
-        voPage.setRecords(postVOList);
-        return voPage;
+        List<PostVO> postVOList = postResultToVOList(pageResult);
+        return new Page<PostVO>(page, pageSize, pageResult.getTotal()).setRecords(postVOList);
     }
 
+    /** 查询某用户的所有贴文（分页） */
+    public IPage<PostVO> getPostsByUserId(Integer userId, Integer page, Integer pageSize) {
+        Page<Post> postPage = new Page<>(page, pageSize);
+        IPage<Post> pageResult = postMapper.selectPage(postPage,
+                new LambdaQueryWrapper<Post>()
+                        .eq(Post::getIsActive, 1)
+                        .eq(Post::getUserId, userId)
+                        .orderByDesc(Post::getCreateTime));
+
+        List<PostVO> postVOList = postResultToVOList(pageResult);
+        return new Page<PostVO>(page, pageSize, pageResult.getTotal()).setRecords(postVOList);
+    }
 
     /** 获取动态评论 */
     public IPage<PostCommentDTO> getCommentsByPost(Integer postId, Integer page, Integer pageSize) {
@@ -206,5 +177,50 @@ public class PostService {
             postLikeMapper.insert(like);
             return true;
         }
+    }
+
+
+
+    private List<PostVO> postResultToVOList(IPage<Post> pageResult) {
+        return pageResult.getRecords().stream()
+                .map(this::convertToPostVO)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+    }
+    private PostVO convertToPostVO(Post post) {
+        PostVO vo = new PostVO();
+        vo.setId(post.getId());
+        vo.setAddedBy(post.getUserId());
+        vo.setContentText(post.getContent());
+        vo.setLinkUrl(post.getLinkUrl());
+        vo.setAddedAt(post.getCreateTime());
+
+        if (post.getSongId() != null) {
+            Song song = songService.getSongById(post.getSongId());
+            if (song == null) return null;
+            SongContent songContent = songService.getSongContentBySong(song);
+            if (song != null && songContent == null) return null;
+            vo.setSongContent(songContent);
+        }
+
+        vo.setImageUrls(postImageMapper.selectList(
+                        new LambdaQueryWrapper<PostImage>()
+                                .eq(PostImage::getPostId, post.getId())
+                                .eq(PostImage::getIsActive, 1))
+                .stream().map(PostImage::getImageUrl).collect(Collectors.toList()));
+
+        vo.setLikeCount(Math.toIntExact(postLikeMapper.selectCount(
+                new LambdaQueryWrapper<PostLike>().eq(PostLike::getPostId, post.getId()))));
+        vo.setCommentCount(Math.toIntExact(postCommentMapper.selectCount(
+                new LambdaQueryWrapper<PostComment>().eq(PostComment::getPostId, post.getId()))));
+        vo.setLikedByCurrentUser(false); //默认不展示
+
+        User user = userMapper.selectById(post.getUserId());
+        if (user != null) {
+            vo.setAddedByName(user.getNickname());
+            vo.setAddedByAvatar(UserUtils.getAvatar());
+        }
+
+        return vo;
     }
 }
