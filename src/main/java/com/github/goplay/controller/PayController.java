@@ -1,15 +1,12 @@
 package com.github.goplay.controller;
 
-import com.github.goplay.constant.Status;
+import com.github.goplay.constant.PayStatus;
 import com.github.goplay.entity.PaymentOrder;
 import com.github.goplay.service.PaymentOrderService;
 import com.github.goplay.service.UserService;
 import com.github.goplay.utils.CommonUtils;
 import com.github.goplay.utils.JwtUtils;
 import com.github.goplay.utils.Result;
-import jakarta.validation.constraints.Min;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -65,12 +62,12 @@ public class PayController {
         if(order.getPaidAmount()!=null && order.getSuccessTime()!=null){
             return Result.ok()
                     .oData(Map.of(
-                            "status", Status.OrderStatus.getDescByCode(order.getStatus()),
+                            "status", PayStatus.OrderStatus.getDescByCode(order.getStatus()),
                             "paidAmount", order.getPaidAmount(),
                             "successTime", order.getSuccessTime() ))
                     .message("订单已完成！");
         }else{
-            return Result.empty().message("订单尚未完成！").oData(Map.of("status", Status.OrderStatus.getDescByCode(order.getStatus())));
+            return Result.empty().message("订单尚未完成！").oData(Map.of("status", PayStatus.OrderStatus.getDescByCode(order.getStatus())));
         }
     }
 
@@ -87,7 +84,7 @@ public class PayController {
             @PathVariable boolean success) {
 
         PaymentOrder order =orderService.processMockPayment(prepayId, success);
-        if(order.getStatus()==Status.OrderStatus.PAID.getCode()){//支付成功，增加积分并增加用户vip累计信息
+        if(order.getStatus()== PayStatus.OrderStatus.PAID.getCode()){//支付成功，增加积分并增加用户vip累计信息
             int addedHPoints = calculatePoints(order.getAmount());
             userService.updateUserHPoints(order.getUserId(), addedHPoints);
             userService.renewUserVipInfo(order.getUserId(), addedHPoints, CommonUtils.curTime(), -1);

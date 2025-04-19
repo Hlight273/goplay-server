@@ -32,8 +32,6 @@ public class RoomController {
     @Autowired
     private PlaylistService playlistService;
     @Autowired
-    private PlaylistSongService playlistSongService;
-    @Autowired
     private PlaylistSongMapper playlistSongMapper;
     @Autowired
     private PlayerOperationCache playerOperationCache;

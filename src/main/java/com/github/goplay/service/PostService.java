@@ -13,7 +13,9 @@ import com.github.goplay.mapper.*;
 import com.github.goplay.utils.UserUtils;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -60,6 +62,7 @@ public class PostService {
             }
         }
         return inserted;
+
     }
 
     /** 获取动态列表 */
@@ -84,6 +87,7 @@ public class PostService {
                         .orderByDesc(Post::getCreateTime));
 
         List<PostVO> postVOList = postResultToVOList(pageResult);
+        System.out.println();
         return new Page<PostVO>(page, pageSize, pageResult.getTotal()).setRecords(postVOList);
     }
 

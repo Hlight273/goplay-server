@@ -3,7 +3,7 @@ package com.github.goplay.constant;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Status {
+public class PayStatus {
     public enum OrderStatus {
         CREATED(0, "已创建"),
         PAYING(1, "支付中"),

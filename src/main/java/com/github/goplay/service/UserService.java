@@ -212,6 +212,11 @@ public class UserService {
     }
 
 
-
+    public boolean isUserExist(Integer userId) {
+        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(User::getId, userId);
+        User user = userMapper.selectOne(queryWrapper);
+        return user != null && user.getIsActive()==1;
+    }
 
 }

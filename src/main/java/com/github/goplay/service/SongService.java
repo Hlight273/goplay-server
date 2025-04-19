@@ -98,4 +98,18 @@ public class SongService {
             return null;
         return song;
     }
+
+    public SongContent getSongContentById(Integer id) {
+        Song song = getSongById(id);
+        if(song==null)
+            return null;
+        return getSongContentBySong(song);
+    }
+
+    public boolean isSongExist(Integer id) {
+        Song song = getSongById(id);
+        if(song==null||song.getIsActive()==0)
+            return false;
+        return true;
+    }
 }

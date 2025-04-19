@@ -41,6 +41,12 @@ spring:
           flush-mode: on_save
         timeout: 1800s # 会话过期时间
 
+    rabbitmq:
+      host: localhost
+      port: 5672
+      username: root
+      password: root
+
   devtools:
     restart:
       additional-paths: src/main/java

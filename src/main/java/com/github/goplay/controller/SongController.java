@@ -1,5 +1,7 @@
 package com.github.goplay.controller;
 
+import com.github.goplay.dto.SongContent;
+import com.github.goplay.service.SongService;
 import com.github.goplay.utils.FileUtils;
 import com.github.goplay.utils.Result;
 import jakarta.servlet.http.HttpServletResponse;
@@ -17,8 +19,13 @@ import java.net.URLEncoder;
 @RequestMapping("/song")
 public class SongController {
 
+    private final SongService songService;
     @Value("${file.upload-dir.audio}")
     public String audioDir;
+
+    public SongController(SongService songService) {
+        this.songService = songService;
+    }
 
     @GetMapping("/{songUrl}/{isZipped}")
     public void songFile(HttpServletResponse response, @PathVariable String songUrl, @PathVariable Integer isZipped) throws UnsupportedEncodingException { //参考 https://blog.csdn.net/m0_74824592/article/details/144869195
@@ -51,6 +58,17 @@ public class SongController {
             e.printStackTrace();
         }
 
+
+    }
+
+    @GetMapping("/{songId}/songContent")
+    public Result songContent(@PathVariable Integer songId) {
+        SongContent songContent = songService.getSongContentById(songId);
+        if (songContent!=null) {
+            return Result.ok().message("歌曲信息获取成功").oData(songContent);
+        }else{
+            return Result.error().message("歌曲信息获取失败");
+        }
 
     }
 }

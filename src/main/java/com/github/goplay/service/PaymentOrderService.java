@@ -2,22 +2,16 @@ package com.github.goplay.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.baomidou.mybatisplus.extension.service.IService;
-import com.github.goplay.constant.Status;
+import com.github.goplay.constant.PayStatus;
 import com.github.goplay.entity.PaymentOrder;
 import com.github.goplay.exception.OrderNotFoundException;
 import com.github.goplay.mapper.PaymentOrderMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 
 @Service
 @Transactional
@@ -35,7 +29,7 @@ public class PaymentOrderService {
         order.setPrepayId("MOCK_" + UUID.randomUUID());
         order.setUserId(userId);
         order.setAmount(BigDecimal.valueOf(amount));
-        order.setStatus(Status.OrderStatus.CREATED.getCode());
+        order.setStatus(PayStatus.OrderStatus.CREATED.getCode());
         order.setExpireTime(LocalDateTime.now().plusMinutes(30));
 
         // 持久化订单到数据库
@@ -52,7 +46,7 @@ public class PaymentOrderService {
             throw new OrderNotFoundException();
         }
 
-        order.setStatus(success ? Status.OrderStatus.PAID.getCode() : Status.OrderStatus.FAILED.getCode());
+        order.setStatus(success ? PayStatus.OrderStatus.PAID.getCode() : PayStatus.OrderStatus.FAILED.getCode());
         if(success){
             //mock假设金额就是充值金额
             order.setPaidAmount(order.getAmount());
