@@ -26,12 +26,14 @@ public class MusicShareService {
     private final ApplicationEventPublisher eventPublisher;
     private final MusicShareMapper mapper;
     private final ShareMessageSender sender;
+    private final UserService userService;
 
     public void sendShare(Integer senderId, MusicShareMessage musicShareMessage) {
         MusicShare entity = new MusicShare();
         entity.setSenderId(senderId);
         entity.setReceiverId(musicShareMessage.getReceiverId());
         entity.setSongId(musicShareMessage.getSongId());
+        entity.setContentText(musicShareMessage.getContentText());
         entity.setCurStatus(MusicShareStatus.PENDING);
         mapper.insert(entity);
 
@@ -41,7 +43,9 @@ public class MusicShareService {
         message.setReceiverId(musicShareMessage.getReceiverId());
         message.setSongId(musicShareMessage.getSongId());
         message.setSenderAvatar(UserUtils.getAvatar());
+        message.setSenderName(userService.getUserInfoById(musicShareMessage.getReceiverId()).getNickname());
         message.setShareTime(LocalDateTime.now().toString());
+        message.setContentText(musicShareMessage.getContentText());
         sender.sendShareMessage(message);
     }
 
@@ -72,6 +76,8 @@ public class MusicShareService {
             msg.setShareTime(share.getAddedAt().toString());
             msg.setCurStatus(share.getCurStatus());
             msg.setSenderAvatar(UserUtils.getAvatar());
+            msg.setSenderName(userService.getUserInfoById(share.getReceiverId()).getNickname());
+            msg.setContentText(share.getContentText());
             return msg;
         }).collect(Collectors.toList());
     }

@@ -24,11 +24,16 @@ public class MusicShareController {
     public Result sendShare(@RequestHeader("token") String token,
                                   @RequestBody MusicShareMessage musicShareMessage) {
         Integer senderId = JwtUtils.getUserIdFromToken(token);
+        int newHPoint = (userService.getUserHPoints(senderId)-1);
+        if(newHPoint<0)
+            return Result.error().message("积分不足！");
+
         if(!songService.isSongExist(musicShareMessage.getSongId()))
             return Result.error().message("歌曲不存在！");
         if(!userService.isUserExist(musicShareMessage.getReceiverId()))
             return Result.error().message("用户不存在！");
         service.sendShare(senderId, musicShareMessage);
+        userService.updateUserHPoints(senderId, -1);
         return Result.ok().message("success");
     }
 
